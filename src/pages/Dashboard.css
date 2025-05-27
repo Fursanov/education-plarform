@@ -1,0 +1,189 @@
+/* Dashboard.css */
+.dashboard {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 2rem;
+    font-family: 'Inter', sans-serif;
+    color: #2D3748;
+}
+
+.dashboard h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    color: #2D3748;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 3rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid #E2E8F0;
+}
+
+.role-info {
+    background: white;
+    border-radius: 16px;
+    padding: 2.5rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    margin-top: 2rem;
+}
+
+.role-info h2 {
+    font-size: 1.75rem;
+    margin-bottom: 1.5rem;
+    color: #4F46E5;
+    display: flex;
+    align-items: center;
+}
+
+/* Общие стили кнопок */
+.btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+}
+
+.btn-primary {
+    background: linear-gradient(90deg, #4F46E5 0%, #10B981 100%);
+    color: white;
+    border: none;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(79, 70, 229, 0.3);
+}
+
+.logout-btn {
+    background: #FEE2E2;
+    color: #DC2626;
+    border: none;
+}
+
+.logout-btn:hover {
+    background: #FECACA;
+    transform: translateY(-2px);
+    box-shadow: 0 2px 10px rgba(220, 38, 38, 0.1);
+}
+
+/* Стили для ролей */
+.role-tag {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-left: 0.5rem;
+}
+
+.role-tag.student {
+    background-color: #E0F2FE;
+    color: #0369A1;
+}
+
+.role-tag.teacher {
+    background-color: #D1FAE5;
+    color: #065F46;
+}
+
+.role-tag.admin {
+    background-color: #FEE2E2;
+    color: #991B1B;
+}
+
+/* Карточки курсов */
+.courses-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+.course-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+    border: 1px solid #E2E8F0;
+}
+
+.course-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    border-color: #4F46E5;
+}
+
+.course-card h3 {
+    margin-top: 0;
+    color: #4F46E5;
+}
+
+.course-progress {
+    margin-top: 1rem;
+    height: 6px;
+    background: #E2E8F0;
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.course-progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #4F46E5 0%, #10B981 100%);
+    border-radius: 3px;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .dashboard {
+        padding: 1.5rem;
+    }
+
+    .dashboard h1 {
+        font-size: 2rem;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+
+    .dashboard-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .role-info {
+        padding: 1.5rem;
+    }
+}
+
+/* Анимации */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.dashboard {
+    animation: fadeIn 0.6s ease-out forwards;
+}
+
+.loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    font-size: 1.5rem;
+    color: #64748B;
+}

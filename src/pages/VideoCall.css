@@ -1,0 +1,56 @@
+.video-call-container {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: #1a1a1a;
+    color: white;
+}
+
+.video-grid {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1rem;
+    padding: 1rem;
+    overflow-y: auto;
+}
+
+.video-item {
+    position: relative;
+    background: #333;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.video-self, .video-peer {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.user-name {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.5);
+    padding: 0.5rem;
+    text-align: center;
+}
+
+.call-controls {
+    padding: 1rem;
+    text-align: center;
+    background: #252525;
+}
+
+.end-call-btn {
+    padding: 0.8rem 2rem;
+    font-size: 1.1rem;
+}
+
+/* В Dashboard.css добавим стиль для кнопки звонка */
+.course-actions .call-btn {
+    color: #4CAF50;
+    font-weight: bold;
+}

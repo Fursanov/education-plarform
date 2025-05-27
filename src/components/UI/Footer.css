@@ -1,0 +1,35 @@
+.footer {
+    background: #2D3748;
+    color: white;
+    padding: 2rem 0;
+    margin-top: auto;
+}
+
+.footer-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    text-align: center;
+}
+
+.footer p {
+    color: #E2E8F0;
+    font-size: 0.9rem;
+}
+
+.footer a {
+    color: #A5B4FC;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.footer a:hover {
+    color: #818CF8;
+    text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+    .footer-container {
+        padding: 0 1rem;
+    }
+}

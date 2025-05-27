@@ -1,38 +1,89 @@
-.App {
-  text-align: center;
+/* App.css */
+:root {
+  --primary-color: #4F46E5;
+  --secondary-color: #10B981;
+  --text-color: #2D3748;
+  --light-gray: #F8FAFC;
+  --medium-gray: #E2E8F0;
+  --dark-gray: #64748B;
+  --error-color: #EF4444;
+  --success-color: #10B981;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  line-height: 1.6;
+  color: var(--text-color);
+  background-color: #F9FAFB;
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+.app-container {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  min-height: 100vh;
+}
+
+.main-content {
+  flex: 1;
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.app-loading {
+  display: flex;
+  flex-direction: column;
   justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  align-items: center;
+  height: 100vh;
+  gap: 1.5rem;
+  font-size: 1.2rem;
+  color: var(--dark-gray);
 }
 
-.App-link {
-  color: #61dafb;
+/* Анимации */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
+.app-container {
+  animation: fadeIn 0.5s ease-out;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+  .main-content {
+    padding: 1rem;
   }
-  to {
-    transform: rotate(360deg);
-  }
+}
+
+/* Глобальные стили для кнопок */
+button {
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+/* Глобальные стили для форм */
+input, textarea, select {
+  font-family: inherit;
+  font-size: 1rem;
+}
+
+/* Глобальные стили для ссылок */
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* Глобальные стили для списков */
+ul {
+  list-style: none;
 }

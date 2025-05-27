@@ -1,0 +1,305 @@
+/* Assignments.css */
+.assignments-page {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 2rem;
+    font-family: 'Inter', sans-serif;
+    color: #2D3748;
+}
+
+.assignments-page h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 2rem;
+    color: #2D3748;
+    background: linear-gradient(90deg, #4F46E5 0%, #10B981 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.create-assignment {
+    background: white;
+    border-radius: 16px;
+    padding: 2rem;
+    margin-bottom: 3rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+.create-assignment h2 {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+    color: #4F46E5;
+}
+
+.create-assignment form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.create-assignment input,
+.create-assignment textarea {
+    width: 100%;
+    padding: 1rem;
+    border: 2px solid #E2E8F0;
+    border-radius: 12px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background-color: #F8FAFC;
+}
+
+.create-assignment textarea {
+    min-height: 150px;
+    resize: vertical;
+}
+
+.create-assignment input[type="datetime-local"] {
+    padding: 0.9rem;
+}
+
+.create-assignment input[type="file"] {
+    padding: 0.5rem;
+    border: none;
+    background: transparent;
+}
+
+.create-assignment input:focus,
+.create-assignment textarea:focus {
+    outline: none;
+    border-color: #4F46E5;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
+    background-color: white;
+}
+
+.create-assignment button {
+    padding: 1rem;
+    border: none;
+    border-radius: 12px;
+    background: linear-gradient(90deg, #4F46E5 0%, #10B981 100%);
+    color: white;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 0.5rem;
+}
+
+.create-assignment button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(79, 70, 229, 0.3);
+}
+
+.assignments-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 1.5rem;
+}
+
+.assignment-card {
+    background: white;
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+    border: 1px solid #E2E8F0;
+    display: flex;
+    flex-direction: column;
+}
+
+.assignment-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    border-color: #4F46E5;
+}
+
+.assignment-card h3 {
+    margin-top: 0;
+    margin-bottom: 1rem;
+    color: #4F46E5;
+    font-size: 1.25rem;
+}
+
+.assignment-card p {
+    color: #64748B;
+    margin-bottom: 0.5rem;
+}
+
+.assignment-card a {
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    background-color: #E0F2FE;
+    color: #0369A1;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.assignment-card a:hover {
+    background-color: #BAE6FD;
+    transform: translateY(-2px);
+}
+
+.empty-state {
+    text-align: center;
+    padding: 3rem;
+    color: #64748B;
+    background: #F8FAFC;
+    border-radius: 16px;
+    grid-column: 1 / -1;
+}
+
+.empty-state p {
+    margin-bottom: 1.5rem;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .assignments-page {
+        padding: 1.5rem;
+    }
+
+    .assignments-list {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Анимации */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.assignments-page {
+    animation: fadeIn 0.6s ease-out forwards;
+}
+
+.back-btn {
+    display: inline-block;
+    margin-bottom: 1.5rem;
+    padding: 0.5rem 1.25rem;
+    border-radius: 12px;
+    background: #F1F5F9;
+    color: #4F46E5;
+    font-weight: 600;
+    font-size: 1rem;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    user-select: none;
+    text-align: center;
+}
+
+.back-btn:hover {
+    background: #E0E7FF;
+    transform: translateY(-2px);
+}
+
+/* Добавляем новые стили к существующим */
+
+.file-preview {
+    position: relative;
+    margin: 0.5rem 0;
+    padding: 0.8rem;
+    background: #f5f5f5;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.preview-image {
+    max-width: 100px;
+    max-height: 100px;
+    border-radius: 6px;
+}
+
+.preview-file {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1rem;
+}
+
+.remove-file-btn {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    width: 24px;
+    height: 24px;
+    background: #EF4444;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.file-attachment {
+    margin: 1rem 0;
+}
+
+.attachment-image {
+    max-width: 100%;
+    max-height: 300px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.attachment-image:hover {
+    transform: scale(1.02);
+}
+
+.file-download-card {
+    display: flex;
+    align-items: center;
+    padding: 0.8rem;
+    background: #f5f5f5;
+    border-radius: 8px;
+    gap: 1rem;
+}
+
+.file-icon {
+    font-size: 1.8rem;
+}
+
+.file-info {
+    flex: 1;
+    display: flex;
+    justify-content: space-between;
+}
+
+.file-name {
+    font-weight: 500;
+    word-break: break-word;
+}
+
+.download-btn {
+    padding: 0.3rem 0.8rem;
+    background: #4F46E5;
+    color: white;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    text-decoration: none;
+    display: inline-block;
+}
+
+/* Адаптивные стили */
+@media (max-width: 768px) {
+    .file-download-card {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .file-icon {
+        font-size: 1.5rem;
+    }
+
+    .preview-image {
+        max-width: 80px;
+        max-height: 80px;
+    }
+}

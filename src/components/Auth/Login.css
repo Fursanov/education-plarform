@@ -1,0 +1,105 @@
+.auth-container {
+    max-width: 480px;
+    margin: 5rem auto;
+    padding: 3rem 4rem;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    text-align: center;
+    font-family: 'Inter', 'Segoe UI', sans-serif;
+}
+
+.auth-container h2 {
+    color: #2D3748;
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 2rem;
+    background: linear-gradient(90deg, #4F46E5 0%, #10B981 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.auth-container form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.auth-container input {
+    padding: 1rem 1.5rem;
+    border: 2px solid #E2E8F0;
+    border-radius: 12px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background-color: #F8FAFC;
+}
+
+.auth-container input:focus {
+    outline: none;
+    border-color: #4F46E5;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
+    background-color: white;
+}
+
+.auth-container button {
+    padding: 1rem;
+    border: none;
+    border-radius: 12px;
+    background: linear-gradient(90deg, #4F46E5 0%, #10B981 100%);
+    color: white;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 0.5rem;
+}
+
+.auth-container button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(79, 70, 229, 0.3);
+}
+
+.auth-container p {
+    color: #64748B;
+    margin-top: 2rem;
+    font-size: 0.95rem;
+}
+
+.auth-container a {
+    color: #4F46E5;
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.2s;
+}
+
+.auth-container a:hover {
+    color: #10B981;
+    text-decoration: underline;
+}
+
+.error {
+    color: #EF4444;
+    background-color: #FEE2E2;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    font-size: 0.95rem;
+}
+
+/* Анимации */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.auth-container {
+    animation: fadeIn 0.6s ease-out forwards;
+}
+
+/* Адаптивность */
+@media (max-width: 640px) {
+    .auth-container {
+        margin: 2rem 1rem;
+        padding: 2rem;
+    }
+}
