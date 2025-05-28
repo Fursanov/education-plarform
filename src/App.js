@@ -70,7 +70,7 @@ function App() {
               <Route path="/create-course" element={<CreateCourse user={user} />} />
               <Route path="/video-call/:courseId" element={<VideoCall user={user} />} />
               <Route path="/assignments/:courseId" element={user ? <Assignments user={user} /> : <Navigate to="/login" />} />
-              <Route path="/chat/:courseId" element={user ? <Chat user={user} /> : <Navigate to="/login" />} />
+              <Route path="/chat/:courseId" element={user ? <Chat userData={userData} user={user} /> : <Navigate to="/login" />} />
               <Route path="/admin" element={user?.role === 'admin' ? <Admin user={user} /> : <Navigate to="/" />} />
               <Route path="/students/:courseId" element={user ? <Students user={user} /> : <Navigate to="/login" />} />
               <Route path="*" element={<Navigate to={user ? "/" : "/login"} />} />

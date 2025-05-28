@@ -3,7 +3,6 @@ import logo from '../../assets/logo.png';
 import './Navbar.css';
 
 function Navbar({ user, toggleSidebar }) {
-    console.log(user)
     return (
         <nav className="navbar">
             <button className="menu-btn" onClick={toggleSidebar} aria-label="Toggle sidebar">

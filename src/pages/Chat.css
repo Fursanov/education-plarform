@@ -630,3 +630,114 @@ body.modal-open {
     padding: 5px 0;
     margin: 10px 0;
 }
+
+.chat-chatSidebar {
+    width: 300px;
+    background: #2d3748;
+    color: white;
+    padding: 1rem;
+    overflow-y: auto;
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+    position: fixed;
+    top: 80px;
+    right: 0;
+    bottom: 50px;
+    z-index: 100;
+}
+
+.chatSidebar-open .chat-chatSidebar {
+    transform: translateX(0);
+}
+
+.chatSidebar-header {
+    padding: 1rem 0;
+    border-bottom: 1px solid #4a5568;
+    margin-bottom: 1rem;
+}
+
+.chatSidebar-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.current-chat-info {
+    padding: 1rem 0;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid #4a5568;
+}
+
+.current-chat-info h3 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.2rem;
+}
+
+.current-chat-info p {
+    margin: 0;
+    color: #a0aec0;
+    font-size: 0.9rem;
+}
+
+.chat-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.chat-item {
+    padding: 1rem;
+    background: #4a5568;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.chat-item:hover {
+    background: #718096;
+}
+
+.chat-item.active {
+    background: #4f46e5;
+}
+
+.chat-name {
+    font-weight: 600;
+    margin-bottom: 0.3rem;
+}
+
+.chat-last-message {
+    font-size: 0.8rem;
+    color: #e2e8f0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.chatSidebar-toggle {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    background: #4f46e5;
+    color: white;
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    font-size: 1.2rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+}
+
+.chat-main-content {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.main-content {
+    padding-top: 90px !important;
+}

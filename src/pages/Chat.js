@@ -1,12 +1,13 @@
 import { useState, useEffect, useRef } from 'react';
-import { Link, useParams } from 'react-router-dom';
-import { getChatMessages, sendChatMessage, getUser, markMessagesAsRead } from '../services/firestore';
+import { Link, useParams, useNavigate } from 'react-router-dom';
+import { getChatMessages, sendChatMessage, getUser, markMessagesAsRead, getUserChats } from '../services/firestore';
 import './Chat.css';
 import { format, isToday, isYesterday } from 'date-fns';
 import { ru } from 'date-fns/locale';
 
 function Chat({ user }) {
     const { courseId } = useParams();
+    const navigate = useNavigate();
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState('');
     const [userData, setUserData] = useState(null);
@@ -16,10 +17,30 @@ function Chat({ user }) {
     const [fullscreenImage, setFullscreenImage] = useState(null);
     const [lastReadTime, setLastReadTime] = useState(null);
     const [initialLoad, setInitialLoad] = useState(true);
+    const [chatSidebarOpen, setChatSidebarOpen] = useState(false);
+    const [userChats, setUserChats] = useState([]);
+    const [currentChatInfo, setCurrentChatInfo] = useState(null);
+
     const fileInputRef = useRef(null);
     const messagesEndRef = useRef(null);
     const messagesContainerRef = useRef(null);
     const unreadSeparatorRef = useRef(null);
+
+    // Получаем список чатов пользователя
+    useEffect(() => {
+        const fetchUserChats = async () => {
+            if (user?.uid) {
+                const chats = await getUserChats(user.uid, userData?.role === "teacher");
+                setUserChats(chats);
+
+                // Находим информацию о текущем чате
+                const currentChat = chats.find(chat => chat.id === courseId);
+                setCurrentChatInfo(currentChat);
+            }
+        };
+
+        fetchUserChats();
+    }, [userData, user, courseId]);
 
     useEffect(() => {
         const fetchUserData = async () => {
@@ -34,16 +55,13 @@ function Chat({ user }) {
 
             if (initialLoad) {
                 setInitialLoad(false);
-                // Ждем обновления DOM и устанавливаем позицию
                 setTimeout(() => {
                     const container = messagesContainerRef.current;
                     if (!container) return;
 
                     if (unreadSeparatorRef.current) {
-                        // Позиционируем сепаратор непрочитанных немного выше центра
-                        container.scrollTop = unreadSeparatorRef.current.offsetTop - container.offsetTop - 500;
+                        container.scrollTop = unreadSeparatorRef.current.offsetTop - container.offsetTop - 50;
                     } else if (messagesEndRef.current) {
-                        // Иначе скроллим в конец
                         container.scrollTop = messagesEndRef.current.offsetTop - container.offsetTop;
                     }
                 }, 100);
@@ -212,140 +230,187 @@ function Chat({ user }) {
         });
     });
 
+    const toggleChatSidebar = () => {
+        setChatSidebarOpen(!chatSidebarOpen);
+    };
+
+    // Функция для перехода в другой чат
+    const navigateToChat = (chatId) => {
+        navigate(`/chat/${chatId}`);
+        setChatSidebarOpen(false);
+    };
+
     return (
-        <div className="chat-page telegram-style">
-            <h1>Чат курса</h1>
+        <div className={`chat-page telegram-style ${chatSidebarOpen ? 'chatSidebar-open' : ''}`}>
+            {/* Кнопка для открытия/закрытия боковой панели */}
+            <button className="chatSidebar-toggle" onClick={toggleChatSidebar}>
+                {chatSidebarOpen ? '✕' : '☰'}
+            </button>
 
-            {fullscreenImage && (
-                <div className="fullscreen-overlay" onClick={() => setFullscreenImage(null)}>
-                    <img
-                        src={fullscreenImage}
-                        alt="Полноэкранное изображение"
-                        className="fullscreen-image"
-                        onClick={(e) => e.stopPropagation()}
-                    />
-                    <button className="close-btn" onClick={() => setFullscreenImage(null)}>×</button>
+            {/* Боковая панель с чатами */}
+            <div className="chat-chatSidebar">
+                <div className="chatSidebar-header">
+                    <h2>Мои чаты</h2>
                 </div>
-            )}
 
-            <div className="messages-container" ref={messagesContainerRef}>
-                {messages.length === 0 && (
-                    <div className="empty-chat">
-                        <p>Чат пока пуст. Будьте первым, кто напишет сообщение!</p>
-                    </div>
-                )}
+                <div className="current-chat-info">
+                    {currentChatInfo && (
+                        <>
+                            <h3>{currentChatInfo.name}</h3>
+                            <p>{currentChatInfo.description}</p>
+                        </>
+                    )}
+                </div>
 
-                {preview && (
-                    <div className="file-preview">
-                        {preview !== 'file' ? (
-                            <img src={preview} alt="Превью" className="preview-image" />
-                        ) : (
-                            <div className="preview-file">
-                                {getFileIcon(file.name)} {file.name}
-                            </div>
-                        )}
-                        <button type="button" onClick={removeFile} className="remove-file-btn">×</button>
-                    </div>
-                )}
-
-                {!preview && groupedMessages.map((item) => {
-                    if (item.type === 'date') {
-                        return (
-                            <div key={item.id} className="date-separator">
-                                {item.dateStr}
-                            </div>
-                        );
-                    } else if (item.type === 'unread') {
-                        return (
-                            <div
-                                key={item.id}
-                                className="unread-separator"
-                                ref={hasUnreadMessages ? unreadSeparatorRef : null}
-                            >
-                                <div className="unread-line"></div>
-                                <div className="unread-label">Новые сообщения</div>
-                                <div className="unread-line"></div>
-                            </div>
-                        );
-                    } else {
-                        const isOwn = item.senderId === user.uid;
-                        const msgDate = item.timestamp?.toDate ? item.timestamp.toDate() : new Date();
-                        return (
-                            <div
-                                key={item.id}
-                                className={`message ${isOwn ? 'sent' : 'received'} ${item.isUnread ? 'unread' : ''}`}
-                            >
-                                <div className="message-content">
-                                    <div className="message-sender">
-                                        {isOwn ? 'Вы' : item.senderName}
-                                    </div>
-                                    {item.fileData && (
-                                        <div className="message-attachment">
-                                            {item.fileType === 'image' ? (
-                                                <img
-                                                    src={item.fileData}
-                                                    alt="Прикрепленное изображение"
-                                                    className="attachment-image"
-                                                    onClick={() => setFullscreenImage(item.fileData)}
-                                                />
-                                            ) : (
-                                                <div className="file-card">
-                                                    <div className="file-icon">{getFileIcon(item.fileName)}</div>
-                                                    <div className="file-details">
-                                                        <div className="file-name">{item.fileName}</div>
-                                                        <div className="file-size">{(item.fileSize / 1024).toFixed(1)} KB</div>
-                                                        <a href={item.fileData} download={item.fileName} className="download-link">
-                                                            Скачать
-                                                        </a>
-                                                    </div>
-                                                </div>
-                                            )}
-                                        </div>
-                                    )}
-
-                                    {item.text && <div className="message-text">{item.text}</div>}
-
-                                    <div className={isOwn ? "message-time-sender" : "message-time"}>{formatTime(msgDate)}</div>
-                                </div>
-                            </div>
-                        );
-                    }
-                })}
-                <div ref={messagesEndRef} />
+                <div className="chat-list">
+                    {userChats.map(chat => (
+                        <Link
+                            key={chat.id}
+                            to={`/chat/${chat.id}`}
+                            className={`chat-item ${chat.id === courseId ? 'active' : ''}`}
+                        >
+                            <div className="chat-name">{chat.name}</div>
+                            <div className="chat-last-message">{chat.lastMessage || 'Нет сообщений'}</div>
+                        </Link>
+                    ))}
+                </div>
             </div>
 
-            <form onSubmit={handleSendMessage} className="message-form telegram-input">
-                <Link to={`/video-call/${courseId}`} className="call-btn" title="Видеозвонок">📞</Link>
-                <div className="input-group">
-                    <input
-                        type="text"
-                        value={newMessage}
-                        onChange={(e) => setNewMessage(e.target.value)}
-                        placeholder="Введите сообщение..."
-                        disabled={isSending}
-                        className="telegram-message-input"
-                    />
-                    <label className="file-upload-btn" title="Прикрепить файл">
-                        <input
-                            type="file"
-                            ref={fileInputRef}
-                            onChange={handleFileChange}
-                            accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.zip,.rar,.7z"
-                            disabled={isSending}
-                            hidden
+            {/* Основное содержимое чата */}
+            <div className="chat-main-content">
+                <h1>Чат курса: {currentChatInfo?.name || ''}</h1>
+
+                {fullscreenImage && (
+                    <div className="fullscreen-overlay" onClick={() => setFullscreenImage(null)}>
+                        <img
+                            src={fullscreenImage}
+                            alt="Полноэкранное изображение"
+                            className="fullscreen-image"
+                            onClick={(e) => e.stopPropagation()}
                         />
-                        📎
-                    </label>
+                        <button className="close-btn" onClick={() => setFullscreenImage(null)}>×</button>
+                    </div>
+                )}
+
+                <div className="messages-container" ref={messagesContainerRef}>
+                    {messages.length === 0 && (
+                        <div className="empty-chat">
+                            <p>Чат пока пуст. Будьте первым, кто напишет сообщение!</p>
+                        </div>
+                    )}
+
+                    {preview && (
+                        <div className="file-preview">
+                            {preview !== 'file' ? (
+                                <img src={preview} alt="Превью" className="preview-image" />
+                            ) : (
+                                <div className="preview-file">
+                                    {getFileIcon(file.name)} {file.name}
+                                </div>
+                            )}
+                            <button type="button" onClick={removeFile} className="remove-file-btn">×</button>
+                        </div>
+                    )}
+
+                    {!preview && groupedMessages.map((item) => {
+                        if (item.type === 'date') {
+                            return (
+                                <div key={item.id} className="date-separator">
+                                    {item.dateStr}
+                                </div>
+                            );
+                        } else if (item.type === 'unread') {
+                            return (
+                                <div
+                                    key={item.id}
+                                    className="unread-separator"
+                                    ref={hasUnreadMessages ? unreadSeparatorRef : null}
+                                >
+                                    <div className="unread-line"></div>
+                                    <div className="unread-label">Новые сообщения</div>
+                                    <div className="unread-line"></div>
+                                </div>
+                            );
+                        } else {
+                            const isOwn = item.senderId === user.uid;
+                            const msgDate = item.timestamp?.toDate ? item.timestamp.toDate() : new Date();
+                            return (
+                                <div
+                                    key={item.id}
+                                    className={`message ${isOwn ? 'sent' : 'received'} ${item.isUnread ? 'unread' : ''}`}
+                                >
+                                    <div className="message-content">
+                                        <div className="message-sender">
+                                            {isOwn ? 'Вы' : item.senderName}
+                                        </div>
+                                        {item.fileData && (
+                                            <div className="message-attachment">
+                                                {item.fileType === 'image' ? (
+                                                    <img
+                                                        src={item.fileData}
+                                                        alt="Прикрепленное изображение"
+                                                        className="attachment-image"
+                                                        onClick={() => setFullscreenImage(item.fileData)}
+                                                    />
+                                                ) : (
+                                                    <div className="file-card">
+                                                        <div className="file-icon">{getFileIcon(item.fileName)}</div>
+                                                        <div className="file-details">
+                                                            <div className="file-name">{item.fileName}</div>
+                                                            <div className="file-size">{(item.fileSize / 1024).toFixed(1)} KB</div>
+                                                            <a href={item.fileData} download={item.fileName} className="download-link">
+                                                                Скачать
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+
+                                        {item.text && <div className="message-text">{item.text}</div>}
+
+                                        <div className={isOwn ? "message-time-sender" : "message-time"}>{formatTime(msgDate)}</div>
+                                    </div>
+                                </div>
+                            );
+                        }
+                    })}
+                    <div ref={messagesEndRef} />
                 </div>
-                <button
-                    type="submit"
-                    disabled={(!newMessage.trim() && !file) || isSending}
-                    className="send-btn"
-                    title="Отправить сообщение"
-                >
-                    {isSending ? '...' : '➤'}
-                </button>
-            </form>
+
+                <form onSubmit={handleSendMessage} className="message-form telegram-input">
+                    <Link to={`/video-call/${courseId}`} className="call-btn" title="Видеозвонок">📞</Link>
+                    <div className="input-group">
+                        <input
+                            type="text"
+                            value={newMessage}
+                            onChange={(e) => setNewMessage(e.target.value)}
+                            placeholder="Введите сообщение..."
+                            disabled={isSending}
+                            className="telegram-message-input"
+                        />
+                        <label className="file-upload-btn" title="Прикрепить файл">
+                            <input
+                                type="file"
+                                ref={fileInputRef}
+                                onChange={handleFileChange}
+                                accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.zip,.rar,.7z"
+                                disabled={isSending}
+                                hidden
+                            />
+                            📎
+                        </label>
+                    </div>
+                    <button
+                        type="submit"
+                        disabled={(!newMessage.trim() && !file) || isSending}
+                        className="send-btn"
+                        title="Отправить сообщение"
+                    >
+                        {isSending ? '...' : '➤'}
+                    </button>
+                </form>
+            </div>
         </div>
     );
 }

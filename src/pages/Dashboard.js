@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { collection, getDocs, query, where, addDoc } from 'firebase/firestore';
+import { collection, getDocs, query, where } from 'firebase/firestore';
 import { db } from '../services/firebase'; // поправь путь под себя
 import { getUser } from '../services/firestore';
 import { Link } from 'react-router-dom';

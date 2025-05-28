@@ -9,7 +9,7 @@ const Sidebar = ({ user, isOpen, toggleSidebar }) => {
                 <h3>Меню</h3>
             </div>
             <div className="sidebar-content">
-                <Link to="/" className="sidebar-links" onClick={toggleSidebar}>
+                <Link to={user?.role === 'admin' ? '/admin' : '/'} className="sidebar-links" onClick={toggleSidebar}>
                     <i className="fas fa-home"></i> Главная
                 </Link>
                 <Link to="/chat/general" className="sidebar-links" onClick={toggleSidebar}>
