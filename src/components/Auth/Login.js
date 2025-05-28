@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { login } from '../../services/auth';
+import { getUserById } from '../../services/firestore'; // функция получения данных юзера
 import './Login.css';
 
 function Login() {
@@ -12,12 +13,30 @@ function Login() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            await login(email, password);
-            navigate('/');
+            const userCredential = await login(email, password);
+            const uid = userCredential.user.uid;
+
+            const userData = await getUserById(uid);
+            if (!userData) {
+                throw new Error("Пользователь не найден в базе данных");
+            }
+
+            switch (userData.role) {
+                case 'admin':
+                    navigate('/admin');
+                    break;
+                case 'teacher':
+                    navigate('/teacher');
+                    break;
+                default:
+                    navigate('/');
+                    break;
+            }
         } catch (err) {
             setError(err.message);
         }
     };
+
 
     return (
         <div className="auth-container">
@@ -40,9 +59,6 @@ function Login() {
                 />
                 <button type="submit">Войти</button>
             </form>
-            <p>
-                Нет аккаунта? <a href="/register">Зарегистрироваться</a>
-            </p>
         </div>
     );
 }

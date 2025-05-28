@@ -2,7 +2,7 @@
 
 .chat-page {
     max-width: 1000px;
-    margin: 2rem auto;
+    margin: 1rem auto;
     padding: 1.5rem 2rem; /* чуть больше отступов */
     font-family: 'Inter', sans-serif;
     display: flex;
@@ -520,11 +520,11 @@
 }
 
 .close-btn {
-    position: fixed;
-    top: 20px;
-    right: 30px;
+    position: relative;
+    top: -33px;
+    left: 168px;
     font-size: 36px;
-    color: white;
+    color: black;
     background: none;
     border: none;
     cursor: pointer;

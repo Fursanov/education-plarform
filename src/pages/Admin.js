@@ -1,15 +1,23 @@
 import { useState, useEffect } from 'react';
 import { getAllUsers, updateUser } from '../services/firestore';
+import RegistrationQR from './RegistrationQR';
+import './Admin.css';
 
 function Admin({ user }) {
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [qrPanelOpen, setQrPanelOpen] = useState(false); // <-- состояние открытия панели
 
     useEffect(() => {
         const fetchUsers = async () => {
-            const usersList = await getAllUsers();
-            setUsers(usersList);
-            setLoading(false);
+            try {
+                const usersList = await getAllUsers();
+                setUsers(usersList);
+            } catch (error) {
+                console.error("Ошибка при загрузке пользователей:", error);
+            } finally {
+                setLoading(false);
+            }
         };
         fetchUsers();
     }, []);
@@ -21,49 +29,69 @@ function Admin({ user }) {
                 user.id === userId ? { ...user, role: newRole } : user
             ));
         } catch (err) {
-            console.error("Error updating user role:", err);
+            console.error("Ошибка при обновлении роли пользователя:", err);
         }
     };
 
-    if (loading) return <div>Загрузка...</div>;
+    if (loading) return <div className="admin-page">Загрузка...</div>;
 
     return (
         <div className="admin-page">
             <h1>Панель администратора</h1>
 
+            <div style={{ marginBottom: '20px' }}>
+                <button
+                    className="qr-toggle-button"
+                    onClick={() => setQrPanelOpen(!qrPanelOpen)}
+                    aria-expanded={qrPanelOpen}
+                >
+                    {qrPanelOpen ? 'Закрыть генератор QR' : 'Открыть генератор QR'}
+                </button>
+            </div>
+
+            {/* Слайд-аут панель с QR */}
+            <div className={`qr-slide-panel ${qrPanelOpen ? 'open' : ''}`}>
+                {user && <RegistrationQR user={user} />}
+            </div>
+
             <div className="users-list">
                 <h2>Пользователи системы</h2>
-                <table>
-                    <thead>
-                    <tr>
-                        <th>Имя</th>
-                        <th>Email</th>
-                        <th>Роль</th>
-                        <th>Действия</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {users.map((userItem) => (
-                        <tr key={userItem.id}>
-                            <td>{userItem.name}</td>
-                            <td>{userItem.email}</td>
-                            <td>{userItem.role}</td>
-                            <td>
-                                {userItem.id !== user.uid && (
-                                    <select
-                                        value={userItem.role}
-                                        onChange={(e) => handleRoleChange(userItem.id, e.target.value)}
-                                    >
-                                        <option value="student">Обучающийся</option>
-                                        <option value="teacher">Преподаватель</option>
-                                        <option value="admin">Администратор</option>
-                                    </select>
-                                )}
-                            </td>
+                <div className="table-wrapper">
+                    <table className="admin-table">
+                        <thead>
+                        <tr>
+                            <th>Имя</th>
+                            <th>Email</th>
+                            <th>Роль</th>
+                            <th>Действия</th>
                         </tr>
-                    ))}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                        {users.map((userItem) => (
+                            <tr key={userItem.id}>
+                                <td>{userItem.name}</td>
+                                <td>{userItem.email}</td>
+                                <td>{userItem.role}</td>
+                                <td>
+                                    {user && userItem.id !== user.uid && (
+                                        <select
+                                            className="admin-search-input"
+                                            value={userItem.role}
+                                            onChange={(e) =>
+                                                handleRoleChange(userItem.id, e.target.value)
+                                            }
+                                        >
+                                            <option value="student">Обучающийся</option>
+                                            <option value="teacher">Преподаватель</option>
+                                            <option value="admin">Администратор</option>
+                                        </select>
+                                    )}
+                                </td>
+                            </tr>
+                        ))}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     );

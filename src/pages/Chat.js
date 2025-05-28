@@ -15,9 +15,11 @@ function Chat({ user }) {
     const [preview, setPreview] = useState(null);
     const [fullscreenImage, setFullscreenImage] = useState(null);
     const [lastReadTime, setLastReadTime] = useState(null);
+    const [initialLoad, setInitialLoad] = useState(true);
     const fileInputRef = useRef(null);
     const messagesEndRef = useRef(null);
     const messagesContainerRef = useRef(null);
+    const unreadSeparatorRef = useRef(null);
 
     useEffect(() => {
         const fetchUserData = async () => {
@@ -29,11 +31,27 @@ function Chat({ user }) {
 
         const unsubscribe = getChatMessages(courseId, (messagesList) => {
             setMessages(messagesList);
-            scrollToBottom();
+
+            if (initialLoad) {
+                setInitialLoad(false);
+                // Ждем обновления DOM и устанавливаем позицию
+                setTimeout(() => {
+                    const container = messagesContainerRef.current;
+                    if (!container) return;
+
+                    if (unreadSeparatorRef.current) {
+                        // Позиционируем сепаратор непрочитанных немного выше центра
+                        container.scrollTop = unreadSeparatorRef.current.offsetTop - container.offsetTop - 500;
+                    } else if (messagesEndRef.current) {
+                        // Иначе скроллим в конец
+                        container.scrollTop = messagesEndRef.current.offsetTop - container.offsetTop;
+                    }
+                }, 100);
+            }
         });
 
         return () => unsubscribe();
-    }, [courseId, user]);
+    }, [courseId, user, initialLoad]);
 
     useEffect(() => {
         const container = messagesContainerRef.current;
@@ -64,10 +82,6 @@ function Chat({ user }) {
             setPreview('file');
         }
     }, [file]);
-
-    const scrollToBottom = () => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "auto" });
-    };
 
     const handleFileChange = (e) => {
         if (e.target.files && e.target.files[0]) {
@@ -130,7 +144,11 @@ function Chat({ user }) {
             if (fileInputRef.current) {
                 fileInputRef.current.value = '';
             }
-            scrollToBottom();
+
+            // Плавный скролл вниз после отправки
+            setTimeout(() => {
+                messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+            }, 100);
         } catch (err) {
             console.error("Error sending message:", err);
             alert('Ошибка при отправке сообщения');
@@ -239,7 +257,11 @@ function Chat({ user }) {
                         );
                     } else if (item.type === 'unread') {
                         return (
-                            <div key={item.id} className="unread-separator">
+                            <div
+                                key={item.id}
+                                className="unread-separator"
+                                ref={hasUnreadMessages ? unreadSeparatorRef : null}
+                            >
                                 <div className="unread-line"></div>
                                 <div className="unread-label">Новые сообщения</div>
                                 <div className="unread-line"></div>

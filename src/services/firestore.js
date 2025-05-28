@@ -1,6 +1,5 @@
 import { db } from "./firebase";
 import {
-    getFirestore,
     collection,
     addDoc,
     doc,
@@ -8,12 +7,18 @@ import {
     setDoc,
     updateDoc,
     query,
-    where,
     getDocs,
     onSnapshot,
     serverTimestamp,
     orderBy
 } from "firebase/firestore";
+
+export const getUserById = async (uid) => {
+    const docRef = doc(db, 'users', uid);
+    const docSnap = await getDoc(docRef);
+    return docSnap.exists() ? { id: docSnap.id, ...docSnap.data() } : null;
+};
+
 
 // Добавление пользователя
 export const addUser = async (uid, email, role, name) => {

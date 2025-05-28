@@ -13,8 +13,6 @@ function Dashboard({ user }) {
     const [loadingUser, setLoadingUser] = useState(true);
     const [loadingStudentCourses, setLoadingStudentCourses] = useState(true);
     const [loadingTeacherCourses, setLoadingTeacherCourses] = useState(true);
-    const [newCourseTitle, setNewCourseTitle] = useState('');
-    const [newCourseDesc, setNewCourseDesc] = useState('');
 
     useEffect(() => {
         const fetchUserData = async () => {
@@ -157,7 +155,6 @@ function Dashboard({ user }) {
                                             <Link to={`/assignments/${course.id}`}>Задания</Link>
                                             <Link to={`/students/${course.id}`}>Студенты</Link>
                                             <Link to={`/chat/${course.id}`}>Чат</Link>
-                                            <Link to={`/video-call/${course.id}`} className="call-btn">Видеозвонок</Link>
                                         </div>
                                     </div>
                                 ))}
