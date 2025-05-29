@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getUser, addFriend, checkIfFriend } from '../services/firestore';
-import { useParams } from 'react-router-dom';
+import {Link, useParams} from 'react-router-dom';
 import './Profile.css';
 
 function UserProfile({ currentUser }) {
@@ -98,6 +98,14 @@ function UserProfile({ currentUser }) {
                             >
                                 {adding ? "Добавление..." : "Добавить в друзья"}
                             </button>
+                        )}
+                        {isFriend && (
+                            <Link
+                                to={`/chat/private/${userId}`}
+                                className="btn chat-btn"
+                            >
+                                Написать сообщение
+                            </Link>
                         )}
                     </div>
                 )}

@@ -78,7 +78,17 @@ function Register() {
                 });
             }
 
-            navigate('/');
+            switch (role) {
+                case 'admin':
+                    navigate('/admin');
+                    break;
+                case 'teacher':
+                    navigate('/teacher');
+                    break;
+                default:
+                    navigate('/');
+                    break;
+            }
         } catch (err) {
             setError(err.message);
         }

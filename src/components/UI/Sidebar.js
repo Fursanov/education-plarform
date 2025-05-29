@@ -18,6 +18,9 @@ const Sidebar = ({ user, isOpen, toggleSidebar }) => {
                 <Link to="/profile" className="sidebar-links" onClick={toggleSidebar}>
                     <i className="fas fa-cog"></i> Профиль
                 </Link>
+                {/*<Link to="/friends" className="sidebar-links" onClick={toggleSidebar}>*/}
+                {/*    <i className="fas fa-user-friends"></i> Друзья и чаты*/}
+                {/*</Link>*/}
             </div>
         </div>
     );

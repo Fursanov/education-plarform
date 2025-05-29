@@ -59,6 +59,24 @@ export const getFriends = async (uid) => {
     return friendIds;
 };
 
+export const sendPrivateMessage = async (message) => {
+    const chatId = [message.from, message.to].sort().join('_');
+    await addDoc(collection(db, 'privateChats', chatId, 'messages'), {
+        ...message,
+        timestamp: serverTimestamp()
+    });
+};
+
+export const getPrivateMessages = async (userId1, userId2) => {
+    const chatId = [userId1, userId2].sort().join('_');
+    const q = query(
+        collection(db, 'privateChats', chatId, 'messages'),
+        orderBy('timestamp')
+    );
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+};
+
 export const getUsersByIds = async (ids) => {
     if (!ids || ids.length === 0) return [];
 
@@ -166,6 +184,9 @@ export const getChatParticipants = async (courseId) => {
         // 1. Получаем данные о курсе
         const courseRef = doc(db, 'courses', courseId);
         const courseSnap = await getDoc(courseRef);
+
+        if (courseId === 'general')
+            return getAllUsers();
 
         if (!courseSnap.exists()) {
             console.log('Course not found');

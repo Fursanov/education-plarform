@@ -134,12 +134,6 @@ function Profile({ user }) {
                 avatar: formData.avatar
             });
 
-            // Затем обновляем Auth Profile
-            await updateAuthProfile({
-                displayName: formData.name,
-                photoURL: formData.avatar
-            });
-
             setSuccess("Профиль успешно обновлен!");
             setEditing(false);
 

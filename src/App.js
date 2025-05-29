@@ -19,6 +19,7 @@ import VideoCall from "./pages/VideoCall";
 import {doc, getDoc} from "firebase/firestore";
 import Profile from "./pages/Profile";
 import UserProfile from "./pages/UserProfile";
+import PrivateChat from "./pages/PrivateChat";
 
 function App() {
   const [user, setUser] = useState(null);
@@ -67,6 +68,7 @@ function App() {
             <Routes>
               <Route path="/login" element={!user ? <Login /> : <Navigate to="/" />} />
               <Route path="/register" element={!user ? <Register /> : <Navigate to="/" />} />
+              <Route path="/chat/private/:userId" element={<PrivateChat currentUser={user} />} />
               <Route path="/profile" element={user ? <Profile user={user} /> : <Navigate to="/" />} />
               <Route path="/profile/:userId" element={<UserProfile currentUser={user} />} />
               <Route path="/" element={user ? <Dashboard user={user} /> : <Navigate to="/login" />} />

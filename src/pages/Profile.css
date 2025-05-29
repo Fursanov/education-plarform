@@ -391,11 +391,10 @@
 
 .user-info, .friend-info {
     flex: 1;
-    display: flex !important;
-    flex-direction: row !important;
 }
 
 .friend-info {
+    display: flex;
     gap: 3px;
     flex-direction: column !important;
 }

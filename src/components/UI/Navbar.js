@@ -33,9 +33,6 @@ function Navbar({ user, toggleSidebar }) {
                                     {user?.name?.charAt(0) || 'U'}
                                 </div>
                             )}
-                            <div className="tmp">
-                                <span className="user-name">{user?.name || 'Пользователь'}</span>
-                            </div>
                         </div>
                     </Link>
                 </div>

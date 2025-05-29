@@ -21,7 +21,7 @@ function RegistrationQR({ user }) { // по умолчанию student
             createdAt: Timestamp.now(),
             expiresAt,
             used: false,
-            newRole, // передаём роль из пропсов
+            role: newRole,
         });
 
         setQrUrl(registrationLink);

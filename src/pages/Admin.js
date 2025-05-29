@@ -2,11 +2,14 @@ import { useState, useEffect } from 'react';
 import { getAllUsers, updateUser } from '../services/firestore';
 import RegistrationQR from './RegistrationQR';
 import './Admin.css';
+import {logout} from "../services/auth";
+import {useNavigate} from "react-router-dom";
 
 function Admin({ user }) {
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [qrPanelOpen, setQrPanelOpen] = useState(false); // <-- состояние открытия панели
+    const [qrPanelOpen, setQrPanelOpen] = useState(false);
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchUsers = async () => {
@@ -33,13 +36,28 @@ function Admin({ user }) {
         }
     };
 
+    const handleLogout = async () => {
+        try {
+            await logout();
+            window.location.href = "/login";
+        } catch (error) {
+            console.error("Ошибка выхода:", error);
+        }
+    };
+
+    const navigateToProfile = (userId) => {
+        if (userId !== user.uid) {
+            navigate(`/profile/${userId}`);
+        }
+    };
+
     if (loading) return <div className="admin-page">Загрузка...</div>;
 
     return (
         <div className="admin-page">
             <h1>Панель администратора</h1>
 
-            <div style={{ marginBottom: '20px' }}>
+            <div style={{ marginBottom: '20px', display: "flex", justifyContent: "space-between" }}>
                 <button
                     className="qr-toggle-button"
                     onClick={() => setQrPanelOpen(!qrPanelOpen)}
@@ -47,6 +65,7 @@ function Admin({ user }) {
                 >
                     {qrPanelOpen ? 'Закрыть генератор QR' : 'Открыть генератор QR'}
                 </button>
+                <button onClick={handleLogout} className="btn logout-btn">Выйти</button>
             </div>
 
             {/* Слайд-аут панель с QR */}
@@ -68,11 +87,11 @@ function Admin({ user }) {
                         </thead>
                         <tbody>
                         {users.map((userItem) => (
-                            <tr key={userItem.id}>
+                            <tr key={userItem.id} onClick={() => navigateToProfile(userItem.id)}>
                                 <td>{userItem.name}</td>
                                 <td>{userItem.email}</td>
                                 <td>{userItem.role}</td>
-                                <td>
+                                <td style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
                                     {user && userItem.id !== user.uid && (
                                         <select
                                             className="admin-search-input"
@@ -85,6 +104,9 @@ function Admin({ user }) {
                                             <option value="teacher">Преподаватель</option>
                                             <option value="admin">Администратор</option>
                                         </select>
+                                    )}
+                                    {user && userItem.id === user.uid && (
+                                        <span style={{width: '100%'}}>вы</span>
                                     )}
                                 </td>
                             </tr>
