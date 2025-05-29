@@ -39,11 +39,6 @@ export const getUser = async (uid) => {
     return docSnap.exists() ? docSnap.data() : null;
 };
 
-// Обновление пользователя (для админа)
-export const updateUser = async (userId, data) => {
-    await updateDoc(doc(db, "users", userId), data);
-};
-
 // Получение всех пользователей
 export const getAllUsers = async () => {
     const querySnapshot = await getDocs(collection(db, "users"));
@@ -74,6 +69,62 @@ export const markMessagesAsRead = async (courseId, userId) => {
     await updateDoc(userRef, {
         [`lastReadChatTimes.${courseId}`]: new Date()
     });
+};
+
+export const updateUser = async (userId, data) => {
+    await setDoc(doc(db, 'users', userId), data, { merge: true });
+};
+
+export const getChatParticipants = async (courseId) => {
+    try {
+        // 1. Получаем данные о курсе
+        const courseRef = doc(db, 'courses', courseId);
+        const courseSnap = await getDoc(courseRef);
+
+        if (!courseSnap.exists()) {
+            console.log('Course not found');
+            return [];
+        }
+
+        const courseData = courseSnap.data();
+
+        // 2. Собираем всех участников: преподаватель + студенты
+        const participantsIds = [
+            courseData.teacherId, // добавляем преподавателя
+            ...(courseData.students || []) // добавляем студентов
+        ].filter(id => id); // убираем возможные undefined/null
+
+        // 3. Удаляем дубликаты (на случай если teacherId есть в students)
+        const uniqueIds = [...new Set(participantsIds)];
+
+        // 4. Получаем данные каждого пользователя
+        const participants = await Promise.all(
+            uniqueIds.map(async (userId) => {
+                const userRef = doc(db, 'users', userId);
+                const userSnap = await getDoc(userRef);
+
+                if (!userSnap.exists()) {
+                    return null;
+                }
+
+                const userData = userSnap.data();
+                return {
+                    id: userId,
+                    name: userData.name || 'Аноним',
+                    email: userData.email || '',
+                    role: userData.role || 'student',
+                    avatar: userData.avatar || null
+                };
+            })
+        );
+
+        // 5. Фильтруем возможные null (если пользователь не найден)
+        return participants.filter(p => p !== null);
+
+    } catch (error) {
+        console.error("Error in getChatParticipants:", error);
+        return [];
+    }
 };
 
 // Добавляем функцию для получения чатов пользователя

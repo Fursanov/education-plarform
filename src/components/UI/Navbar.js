@@ -18,7 +18,7 @@ function Navbar({ user, toggleSidebar }) {
                 </Link>
                 <div className="navbar-links">
                     {user?.role === 'teacher' && (
-                        <Link to="/courses" className="navbar-link">Мои курсы</Link>
+                        <Link to="/" className="navbar-link">Мои курсы</Link>
                     )}
                     {user?.role === 'admin' && (
                         <Link to="/admin" className="navbar-link">Админ-панель</Link>

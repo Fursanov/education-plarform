@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
-import { getChatMessages, sendChatMessage, getUser, markMessagesAsRead, getUserChats } from '../services/firestore';
+import { getChatMessages, sendChatMessage, getUser, markMessagesAsRead, getUserChats, getChatParticipants } from '../services/firestore';
 import './Chat.css';
 import { format, isToday, isYesterday } from 'date-fns';
 import { ru } from 'date-fns/locale';
@@ -20,11 +20,39 @@ function Chat({ user }) {
     const [chatSidebarOpen, setChatSidebarOpen] = useState(false);
     const [userChats, setUserChats] = useState([]);
     const [currentChatInfo, setCurrentChatInfo] = useState(null);
+    const [participants, setParticipants] = useState([]);
+    const [showParticipants, setShowParticipants] = useState(false);
 
     const fileInputRef = useRef(null);
     const messagesEndRef = useRef(null);
     const messagesContainerRef = useRef(null);
     const unreadSeparatorRef = useRef(null);
+    const participantsRef = useRef(null);
+
+
+    // Получаем список участников чата
+    useEffect(() => {
+        const fetchParticipants = async () => {
+            const participantsList = await getChatParticipants(courseId);
+            setParticipants(participantsList);
+        };
+
+        fetchParticipants();
+    }, [courseId]);
+
+    // Закрываем список участников при клике вне его
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (participantsRef.current && !participantsRef.current.contains(event.target)) {
+                setShowParticipants(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
 
     // Получаем список чатов пользователя
     useEffect(() => {
@@ -234,10 +262,8 @@ function Chat({ user }) {
         setChatSidebarOpen(!chatSidebarOpen);
     };
 
-    // Функция для перехода в другой чат
-    const navigateToChat = (chatId) => {
-        navigate(`/chat/${chatId}`);
-        setChatSidebarOpen(false);
+    const toggleParticipants = () => {
+        setShowParticipants(!showParticipants);
     };
 
     return (
@@ -278,7 +304,51 @@ function Chat({ user }) {
 
             {/* Основное содержимое чата */}
             <div className="chat-main-content">
-                <h1>Чат курса: {currentChatInfo?.name || ''}</h1>
+                <div className="chat-header">
+                    <h1>Чат курса: {currentChatInfo?.name || ''}</h1>
+                    <button
+                        className="participants-btn"
+                        onClick={toggleParticipants}
+                        title="Участники чата"
+                    >
+                        👥
+                    </button>
+                </div>
+
+                {/* Список участников чата */}
+                {showParticipants && (
+                    <div className="participants-list" ref={participantsRef}>
+                        <h3>Участники чата ({participants.length})</h3>
+                        <ul>
+                            {participants.map((participant) => (
+                                <li key={participant.id} className="participant-item">
+                                    <div className="participant-avatar">
+                                        {participant.avatar ? (
+                                            <img
+                                                src={participant.avatar}
+                                                alt={`Аватар ${participant.name}`}
+                                                className="participant-avatar-img"
+                                            />
+                                        ) : (
+                                            <div className="participant-avatar-letter">
+                                                {participant.name.charAt(0).toUpperCase()}
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div className="participant-info">
+                                        <div className="participant-name">
+                                            {participant.name}
+                                            {participant.id === user.uid && ' (Вы)'}
+                                        </div>
+                                        <div className="participant-role">
+                                            {participant.role === 'teacher' ? 'Преподаватель' : 'Студент'}
+                                        </div>
+                                    </div>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                )}
 
                 {fullscreenImage && (
                     <div className="fullscreen-overlay" onClick={() => setFullscreenImage(null)}>
