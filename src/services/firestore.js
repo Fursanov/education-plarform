@@ -12,7 +12,9 @@ import {
     setDoc,
     updateDoc,
     where,
-    limit
+    limit,
+    startAt,
+    endAt
 } from "firebase/firestore";
 
 export const getUserById = async (uid) => {
@@ -31,6 +33,90 @@ export const addUser = async (uid, email, role, name) => {
         courses: []
     });
 };
+
+export const checkIfFriend = async (uid, friendId) => {
+    const docRef = doc(db, `friends/${uid}/list`, friendId);
+    const docSnap = await getDoc(docRef);
+    return docSnap.exists();
+};
+
+export const addFriend = async (uid, friendId) => {
+    const docRef = doc(db, `friends/${uid}/list`, friendId);
+    await setDoc(docRef, {
+        addedAt: new Date().toISOString()
+    });
+};
+
+export const getFriends = async (uid) => {
+    const friendsRef = collection(db, `friends/${uid}/list`);
+    const snapshot = await getDocs(friendsRef);
+
+    const friendIds = [];
+    snapshot.forEach(doc => {
+        friendIds.push(doc.id); // friendId — это id документа
+    });
+
+    return friendIds;
+};
+
+export const getUsersByIds = async (ids) => {
+    if (!ids || ids.length === 0) return [];
+
+    const chunkSize = 10; // Firestore поддерживает только 10 элементов в `in`
+    const users = [];
+
+    for (let i = 0; i < ids.length; i += chunkSize) {
+        const chunk = ids.slice(i, i + chunkSize);
+        const q = query(
+            collection(db, 'users'),
+            where('__name__', 'in', chunk)
+        );
+        const querySnapshot = await getDocs(q);
+        querySnapshot.forEach(doc => {
+            users.push({ id: doc.id, ...doc.data() });
+        });
+    }
+
+    return users;
+};
+
+
+export const searchUsersByNameOrTag = async (searchTerm) => {
+    const usersRef = collection(db, 'users');
+    const term = searchTerm.toLowerCase();
+    const searchLimit = 10;
+
+    const nameQuery = query(
+        usersRef,
+        orderBy('name'),
+        startAt(term),
+        endAt(term + '\uf8ff'),
+        limit(searchLimit)
+    );
+
+    const tagQuery = query(
+        usersRef,
+        orderBy('tag'),
+        startAt(term),
+        endAt(term + '\uf8ff'),
+        limit(searchLimit)
+    );
+
+    const [nameSnap, tagSnap] = await Promise.all([getDocs(nameQuery), getDocs(tagQuery)]);
+
+    const usersMap = new Map();
+
+    nameSnap.forEach(doc => {
+        usersMap.set(doc.id, { id: doc.id, ...doc.data() });
+    });
+
+    tagSnap.forEach(doc => {
+        usersMap.set(doc.id, { id: doc.id, ...doc.data() });
+    });
+
+    return Array.from(usersMap.values());
+};
+
 
 // Получение пользователя
 export const getUser = async (uid) => {

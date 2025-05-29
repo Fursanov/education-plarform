@@ -871,3 +871,20 @@ body.modal-open {
     font-size: 12px;
     color: #777;
 }
+
+.participant-item-1 {
+    display: flex;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid #eee;
+    cursor: pointer !important;
+    transition: background-color 0.2s;
+}
+
+.participant-item-1:hover {
+    background-color: #f5f5f5;
+}
+
+.participant-avatar, .participant-name {
+    pointer-events: none;
+}

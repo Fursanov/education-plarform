@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { updateAuthProfile } from '../services/auth';
-import { updateUser, getUser } from '../services/firestore';
+import { updateUser, getUser, getFriends, getUsersByIds, searchUsersByNameOrTag } from '../services/firestore';
 import './Profile.css';
 
 function Profile({ user }) {
+    const navigate = useNavigate();
     const [userData, setUserData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [editing, setEditing] = useState(false);
@@ -17,6 +19,10 @@ function Profile({ user }) {
     const [avatarPreview, setAvatarPreview] = useState(null);
     const [error, setError] = useState(null);
     const [success, setSuccess] = useState(null);
+    const [friends, setFriends] = useState([]);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [searchResults, setSearchResults] = useState([]);
+    const [isSearching, setIsSearching] = useState(false);
 
     useEffect(() => {
         const fetchUserData = async () => {
@@ -33,6 +39,11 @@ function Profile({ user }) {
                 if (data.avatar) {
                     setAvatarPreview(data.avatar);
                 }
+                const friendIds = await getFriends(user.uid);
+                if (friendIds?.length) {
+                    const friendsData = await getUsersByIds(friendIds);
+                    setFriends(friendsData);
+                }
             } catch (err) {
                 console.error("Ошибка загрузки данных:", err);
                 setError("Не удалось загрузить данные профиля");
@@ -43,6 +54,23 @@ function Profile({ user }) {
 
         fetchUserData();
     }, [user]);
+
+    const handleSearch = async (e) => {
+        const query = e.target.value;
+        setSearchQuery(query);
+
+        if (query.trim().length === 0) {
+            setSearchResults([]);
+            return;
+        }
+
+        try {
+            const results = await searchUsersByNameOrTag(query);
+            setSearchResults(results);
+        } catch (err) {
+            console.error('Ошибка поиска:', err);
+        }
+    };
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -71,6 +99,16 @@ function Profile({ user }) {
             }));
         };
         reader.readAsDataURL(file);
+    };
+
+    const handleFriendClick = (friendId) => {
+        navigate(`/profile/${friendId}`);
+    };
+
+    const handleAddFriend = async (userId) => {
+        // Здесь должна быть логика добавления в друзья
+        console.log(`Добавление пользователя ${userId} в друзья`);
+        // После добавления обновите список друзей
     };
 
     const generateUniqueTag = () => {
@@ -236,50 +274,86 @@ function Profile({ user }) {
                     </div>
                 </form>
             ) : (
-                <div className="profile-view">
-                    <div className="profile-avatar">
-                        {userData.avatar ? (
-                            <img src={userData.avatar} alt="Аватар" />
-                        ) : (
-                            <div className="avatar-placeholder">
-                                {userData.name?.charAt(0) || 'U'}
-                            </div>
-                        )}
-                    </div>
-
-                    <div className="profile-info">
-                        <h2>{userData.name}</h2>
-                        <div className="profile-tag">@{userData.tag || 'notag'}</div>
-
-                        <div className="profile-details">
-                            <div className="detail-item">
-                                <span className="detail-label">Email:</span>
-                                <span>{user.email}</span>
-                            </div>
-
-                            {userData.phone && (
-                                <div className="detail-item">
-                                    <span className="detail-label">Телефон:</span>
-                                    <span>{userData.phone}</span>
+                <div className="profile-content">
+                    <div className="profile-view">
+                        <div className="profile-avatar">
+                            {userData.avatar ? (
+                                <img src={userData.avatar} alt="Аватар" />
+                            ) : (
+                                <div className="avatar-placeholder">
+                                    {userData.name?.charAt(0) || 'U'}
                                 </div>
                             )}
+                        </div>
 
-                            {userData.bio && (
+                        <div className="profile-info">
+                            <h2>{userData.name}</h2>
+                            <div className="profile-tag">@{userData.tag || 'notag'}</div>
+
+                            <div className="profile-details">
                                 <div className="detail-item">
-                                    <span className="detail-label">О себе:</span>
-                                    <p>{userData.bio}</p>
+                                    <span className="detail-label">Email:</span>
+                                    <span>{user.email}</span>
                                 </div>
-                            )}
 
-                            <div className="detail-item">
-                                <span className="detail-label">Роль:</span>
-                                <span className={`role-badge ${userData.role}`}>
-                                    {userData.role === 'student' && 'Студент'}
-                                    {userData.role === 'teacher' && 'Преподаватель'}
-                                    {userData.role === 'admin' && 'Администратор'}
-                                </span>
+                                {userData.phone && (
+                                    <div className="detail-item">
+                                        <span className="detail-label">Телефон:</span>
+                                        <span>{userData.phone}</span>
+                                    </div>
+                                )}
+
+                                {userData.bio && (
+                                    <div className="detail-item">
+                                        <span className="detail-label">О себе:</span>
+                                        <p>{userData.bio}</p>
+                                    </div>
+                                )}
+
+                                <div className="detail-item">
+                                    <span className="detail-label">Роль:</span>
+                                    <span className={`role-badge ${userData.role}`}>
+                                        {userData.role === 'student' && 'Студент'}
+                                        {userData.role === 'teacher' && 'Преподаватель'}
+                                        {userData.role === 'admin' && 'Администратор'}
+                                    </span>
+                                </div>
                             </div>
                         </div>
+                    </div>
+                    <div className="friends-section">
+                        <h3>Мои друзья ({friends.length})</h3>
+
+                        {friends.length > 0 ? (
+                            <div className="friends-grid">
+                                {friends.map(friend => (
+                                    <div
+                                        key={friend.id}
+                                        className="friend-card"
+                                        onClick={() => handleFriendClick(friend.id)}
+                                    >
+                                        <div className="friend-avatar">
+                                            {friend.avatar ? (
+                                                <img src={friend.avatar} alt={friend.name} />
+                                            ) : (
+                                                <div className="avatar-letter">
+                                                    {friend.name?.charAt(0).toUpperCase()}
+                                                </div>
+                                            )}
+                                        </div>
+                                        <div className="friend-info">
+                                            <span className="friend-name">{friend.name}</span>
+                                            <span className="friend-tag">@{friend.tag || 'notag'}</span>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="no-friends">
+                                <p>У вас пока нет друзей.</p>
+                                <p>Начните поиск, чтобы добавить друзей!</p>
+                            </div>
+                        )}
                     </div>
                 </div>
             )}

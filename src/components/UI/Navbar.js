@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import logo from '../../assets/logo.png';
 import './Navbar.css';
+import React from "react";
 
 function Navbar({ user, toggleSidebar }) {
     return (
@@ -23,7 +24,20 @@ function Navbar({ user, toggleSidebar }) {
                     {user?.role === 'admin' && (
                         <Link to="/admin" className="navbar-link">Админ-панель</Link>
                     )}
-                    <Link to="/profile" className="navbar-link">Профиль</Link>
+                    <Link to="/profile" className="navbar-link">
+                        <div className="user-info">
+                            {user?.avatar ? (
+                                <img className="user-avatar" src={user?.avatar} alt="Аватар" />
+                            ) : (
+                                <div className="user-avatar">
+                                    {user?.name?.charAt(0) || 'U'}
+                                </div>
+                            )}
+                            <div className="tmp">
+                                <span className="user-name">{user?.name || 'Пользователь'}</span>
+                            </div>
+                        </div>
+                    </Link>
                 </div>
             </div>
         </nav>

@@ -129,4 +129,10 @@
     display: block; /* скрыта по умолчанию */
 }
 
+.tmp .user-name {
+    left: unset;
+    right: unset;
+    bottom: unset;
+    background: unset;
+}
 

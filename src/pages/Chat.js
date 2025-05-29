@@ -29,6 +29,12 @@ function Chat({ user }) {
     const unreadSeparatorRef = useRef(null);
     const participantsRef = useRef(null);
 
+    const navigateToProfile = (userId) => {
+        if (userId !== user.uid) {
+            navigate(`/profile/${userId}`);
+        }
+    };
+
 
     // Получаем список участников чата
     useEffect(() => {
@@ -321,7 +327,7 @@ function Chat({ user }) {
                         <h3>Участники чата ({participants.length})</h3>
                         <ul>
                             {participants.map((participant) => (
-                                <li key={participant.id} className="participant-item">
+                                <li key={participant.id} className={`${participant.id === user.uid ? "participant-item" : "participant-item participant-item-1"}`} onClick={() => navigateToProfile(participant.id)}>
                                     <div className="participant-avatar">
                                         {participant.avatar ? (
                                             <img
