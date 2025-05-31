@@ -47,12 +47,14 @@
 }
 
 .profile-info {
-    flex: 1;
+    flex: 2;
+    width: 40%;
 }
 
 .profile-info h2 {
     margin: 0 0 0.5rem;
     color: #333;
+    max-width: 100%;
 }
 
 .profile-tag {
@@ -74,7 +76,7 @@
 
 .detail-label {
     font-weight: bold;
-    min-width: 100px;
+    min-width: 170px;
     color: #555;
 }
 
@@ -463,4 +465,13 @@
     .friends-grid {
         grid-template-columns: 1fr;
     }
+}
+
+.friend-action {
+    display: flex;
+    justify-content: space-between;
+}
+
+.friend-status {
+    text-align: center;
 }

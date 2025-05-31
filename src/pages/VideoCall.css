@@ -54,3 +54,127 @@
     color: #4CAF50;
     font-weight: bold;
 }
+
+/* Стили для контейнера с аватаром */
+.video-placeholder {
+    width: 100%;
+    height: 100%;
+    background-color: #f0f2f5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+/* Стили для аватарки пользователя */
+.user-avatar {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Стили для fallback аватара (когда нет фото) */
+.avatar-fallback {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #3f51b5;
+    color: white;
+    font-size: 3rem;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+/* Дополнительные стили для видео элементов */
+.video-item {
+    position: relative;
+    width: 100%;
+    height: 0;
+    padding-bottom: 56.25%; /* 16:9 соотношение */
+    background-color: #000;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 10px;
+}
+
+.video-self,
+.video-peer,
+.video-placeholder {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.user-name {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+    padding: 5px 10px;
+    font-size: 0.9rem;
+    text-align: center;
+}
+
+/* Адаптивные стили для сетки видео */
+.video-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+/* Медиа-запросы для мобильных устройств */
+@media (max-width: 768px) {
+    .video-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .video-item {
+        padding-bottom: 75%; /* 4:3 для мобильных */
+    }
+
+    .avatar-fallback {
+        font-size: 2rem;
+    }
+}
+
+/* Стили для индикаторов состояния */
+.status-indicator {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(0, 0, 0, 0.6);
+    color: white;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.status-icon {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+.status-icon.muted {
+    background-color: #f44336;
+}
+
+.status-icon.video-off {
+    background-color: #ff9800;
+}
+
+.status-icon.active {
+    background-color: #4caf50;
+}

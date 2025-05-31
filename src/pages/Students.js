@@ -110,7 +110,6 @@ function Students({ user }) {
                 setCourseStudents(prev => [...prev, addedStudent]);
             }
 
-            alert('Студент добавлен в курс');
         } catch (error) {
             console.error(error);
             alert('Ошибка при добавлении студента');
@@ -170,7 +169,7 @@ function Students({ user }) {
                             onClick={() => setSelectedCourse(course)}
                             className={selectedCourse?.id === course.id ? 'active' : ''}
                         >
-                            {course.title}
+                            {course.courseTitle}
                         </button>
                     ))}
                 </div>

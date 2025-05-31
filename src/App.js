@@ -72,7 +72,6 @@ function App() {
               <Route path="/profile" element={user ? <Profile user={user} /> : <Navigate to="/" />} />
               <Route path="/profile/:userId" element={<UserProfile currentUser={user} />} />
               <Route path="/" element={user ? <Dashboard user={user} /> : <Navigate to="/login" />} />
-              <Route path="/admin" element={user ? <Admin user={user} /> : <Navigate to="/login" />} />
               <Route path="/create-course" element={<CreateCourse user={user} />} />
               <Route path="/video-call/:courseId" element={<VideoCall user={user} />} />
               <Route path="/assignments/:courseId" element={user ? <Assignments user={user} /> : <Navigate to="/login" />} />

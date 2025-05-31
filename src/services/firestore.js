@@ -302,8 +302,8 @@ export const getUserChats = async (userId, isTeacher, isAdmin = false) => {
 
                 return {
                     id: courseId,
-                    name: courseData.title || 'Без названия',
-                    description: courseData.description || '',
+                    name: courseData.courseTitle || 'Без названия',
+                    description: courseData.courseDescription || '',
                     lastMessage,
                     teacher: teacherName,
                     unreadCount: 0,

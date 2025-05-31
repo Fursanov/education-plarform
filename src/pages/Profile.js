@@ -345,7 +345,6 @@ function Profile({ user }) {
                         ) : (
                             <div className="no-friends">
                                 <p>У вас пока нет друзей.</p>
-                                <p>Начните поиск, чтобы добавить друзей!</p>
                             </div>
                         )}
                     </div>

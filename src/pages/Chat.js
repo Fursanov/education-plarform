@@ -282,7 +282,7 @@ function Chat({ user }) {
             {/* Боковая панель с чатами */}
             <div className="chat-chatSidebar">
                 <div className="chatSidebar-header">
-                    <h2>Мои чаты</h2>
+                    <h2>Чаты курсов</h2>
                 </div>
 
                 <div className="current-chat-info">
@@ -311,7 +311,11 @@ function Chat({ user }) {
             {/* Основное содержимое чата */}
             <div className="chat-main-content">
                 <div className="chat-header">
-                    <h1>Чат курса: {currentChatInfo?.name || ''}</h1>
+                    {courseId !== 'general' ? (
+                        <h1>Чат курса: {currentChatInfo?.name ?? ''}</h1>
+                    ) : (
+                        <h1>Общий чат</h1>
+                    )}
                     <button
                         className="participants-btn"
                         onClick={toggleParticipants}

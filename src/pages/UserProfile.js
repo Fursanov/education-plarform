@@ -38,6 +38,7 @@ function UserProfile({ currentUser }) {
         setAdding(true);
         try {
             await addFriend(currentUser.uid, userId);
+            await addFriend(userId, currentUser.uid);
             setIsFriend(true);
         } catch (err) {
             console.error("Ошибка добавления в друзья:", err);
@@ -65,10 +66,46 @@ function UserProfile({ currentUser }) {
                 </div>
 
                 <div className="profile-info">
+                    {currentUser && currentUser.uid !== userId && (
+                        <div className="friend-action">
+                            {isFriend && (
+                                <Link
+                                    to={`/chat/private/${userId}`}
+                                    className="btn add-friend-btn"
+                                >
+                                    Написать сообщение
+                                </Link>
+                            )}
+                            {isFriend ? (
+                                <span className="friend-status">Уже в друзьях</span>
+                            ) : (
+                                <button
+                                    onClick={handleAddFriend}
+                                    className="btn add-friend-btn"
+                                    disabled={adding}
+                                >
+                                    {adding ? "Добавление..." : "Добавить в друзья"}
+                                </button>
+                            )}
+                        </div>
+                    )}
                     <h2>{userData.name}</h2>
                     <div className="profile-tag">@{userData.tag || 'notag'}</div>
 
                     <div className="profile-details">
+                        {userData.phone && (
+                            <div className="detail-item">
+                                <span className="detail-label">Мобильный номер:</span>
+                                <p>{userData.phone}</p>
+                            </div>
+                        )}
+
+                        {userData.email && (
+                            <div className="detail-item">
+                                <span className="detail-label">email:</span>
+                                <p>{userData.email}</p>
+                            </div>
+                        )}
                         <div className="detail-item">
                             <span className="detail-label">Роль:</span>
                             <span className={`role-badge ${userData.role}`}>
@@ -86,29 +123,6 @@ function UserProfile({ currentUser }) {
                         )}
                     </div>
                 </div>
-                {currentUser && currentUser.uid !== userId && (
-                    <div className="friend-action">
-                        {isFriend ? (
-                            <span className="friend-status">Уже в друзьях</span>
-                        ) : (
-                            <button
-                                onClick={handleAddFriend}
-                                className="btn add-friend-btn"
-                                disabled={adding}
-                            >
-                                {adding ? "Добавление..." : "Добавить в друзья"}
-                            </button>
-                        )}
-                        {isFriend && (
-                            <Link
-                                to={`/chat/private/${userId}`}
-                                className="btn chat-btn"
-                            >
-                                Написать сообщение
-                            </Link>
-                        )}
-                    </div>
-                )}
             </div>
         </div>
     );

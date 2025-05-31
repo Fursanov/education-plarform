@@ -1,0 +1,23 @@
+.import-label {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #4caf50;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+    margin: 1rem 0;
+}
+
+.import-label:hover {
+    background-color: #45a049;
+}
+
+.error-message {
+    color: red;
+    margin-top: 0.5rem;
+}
+
+.success-message {
+    color: green;
+    margin-top: 0.5rem;
+}

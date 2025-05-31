@@ -248,6 +248,22 @@ function VideoCall({ user }) {
                         muted
                         className="video-self"
                     />
+                    {isVideoOff && (
+                        <div>
+                            (
+                            <div className="video-placeholder">
+                                {user?.avatar ? (
+                                    <img src={user?.avatar} alt={`Аватар ${user?.name}`} className="user-avatar" />
+                                ) : (
+                                    <div className="avatar-fallback">
+                                        {user?.name?.charAt(0) || 'У'}
+                                    </div>
+                                )}
+                            </div>
+                            )
+                            <div className="user-name">{user?.name}</div>
+                        </div>
+                        )}
                     <div className="user-name">Вы ({isMuted ? 'микрофон выключен' : 'микрофон включен'})</div>
                 </div>
 

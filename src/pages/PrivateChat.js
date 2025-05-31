@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { sendPrivateMessage, getPrivateMessages, getUser } from '../services/firestore';
-import './PrivateChat.css';
+import './Chat.css';
 import { format, isToday, isYesterday } from 'date-fns';
 import { ru } from 'date-fns/locale';
 
@@ -15,7 +15,10 @@ function PrivateChat({ currentUser }) {
     const [recipientData, setRecipientData] = useState(null);
     const [file, setFile] = useState(null);
     const [preview, setPreview] = useState(null);
+    const [fullscreenImage, setFullscreenImage] = useState(null);
     const messagesEndRef = useRef(null);
+    const messagesContainerRef = useRef(null);
+    const fileInputRef = useRef(null);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -26,7 +29,6 @@ function PrivateChat({ currentUser }) {
                 const chatMessages = await getPrivateMessages(currentUser.uid, userId);
                 setMessages(chatMessages);
 
-                // Автоскролл к новым сообщениям
                 setTimeout(() => {
                     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
                 }, 100);
@@ -43,7 +45,7 @@ function PrivateChat({ currentUser }) {
 
     const handleSendMessage = async (e) => {
         e.preventDefault();
-        if (!newMessage.trim() && !file) return;
+        if ((!newMessage.trim() && !file)) return;
 
         try {
             let fileData = null;
@@ -54,7 +56,8 @@ function PrivateChat({ currentUser }) {
                 fileData = await readFileAsBase64(file);
             }
 
-            await sendPrivateMessage({
+            // Создаем объект нового сообщения
+            const newMsg = {
                 from: currentUser.uid,
                 to: userId,
                 text: newMessage,
@@ -65,13 +68,21 @@ function PrivateChat({ currentUser }) {
                     fileName: file.name,
                     fileSize: file.size
                 })
-            });
+            };
+
+            // Отправляем сообщение
+            await sendPrivateMessage(newMsg);
+
+            // Добавляем сообщение в локальное состояние
+            setMessages(prev => [...prev, newMsg]);
 
             setNewMessage('');
             setFile(null);
             setPreview(null);
+            if (fileInputRef.current) {
+                fileInputRef.current.value = '';
+            }
 
-            // Скролл к новому сообщению
             setTimeout(() => {
                 messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
             }, 100);
@@ -112,6 +123,9 @@ function PrivateChat({ currentUser }) {
     const removeFile = () => {
         setFile(null);
         setPreview(null);
+        if (fileInputRef.current) {
+            fileInputRef.current.value = '';
+        }
     };
 
     const getFileIcon = (fileName) => {
@@ -128,114 +142,178 @@ function PrivateChat({ currentUser }) {
         return format(date, 'HH:mm', { locale: ru });
     };
 
+    const formatDateSeparator = (date) => {
+        if (isToday(date)) return 'Сегодня';
+        if (isYesterday(date)) return 'Вчера';
+        return format(date, 'dd MMMM yyyy', { locale: ru });
+    };
+
+    const groupedMessages = [];
+    let lastDate = null;
+
+    messages.forEach((msg) => {
+        const msgDate = msg.timestamp?.toDate ? msg.timestamp.toDate() : new Date();
+        const dateStr = formatDateSeparator(msgDate);
+
+        if (dateStr !== lastDate) {
+            groupedMessages.push({
+                type: 'date',
+                id: `date-${dateStr}`,
+                dateStr
+            });
+            lastDate = dateStr;
+        }
+
+        groupedMessages.push({
+            type: 'message',
+            ...msg
+        });
+    });
+
     if (loading) return <div className="loading">Загрузка чата...</div>;
     if (error) return <div className="error">{error}</div>;
 
     return (
-        <div className="private-chat-container">
-            <div className="chat-header">
-                <button onClick={() => navigate(-1)} className="back-button">← Назад</button>
-                <div
-                    className="recipient-info"
-                    onClick={() => navigate(`/profile/${userId}`)}
-                >
-                    {recipientData?.avatar ? (
-                        <img src={recipientData.avatar} alt={recipientData.name} className="recipient-avatar" />
-                    ) : (
-                        <div className="avatar-placeholder1">
-                            {recipientData?.name?.charAt(0) || 'U'}
-                        </div>
-                    )}
-                    <div>
-                        <h3>{recipientData?.name || 'Пользователь'}</h3>
-                        <div className="recipient-status">online</div>
+        <div className="chat-page">
+            <div className="chat-main-content">
+                <div className="chat-header">
+                    <button onClick={() => navigate(-1)} className="back-button">← Назад</button>
+                    <div className="recipient-info">
+                        {recipientData?.avatar ? (
+                            <img
+                                src={recipientData.avatar}
+                                alt={recipientData.name}
+                                className="participant-avatar-img1"
+                                onClick={() => navigate(`/profile/${userId}`)}
+                            />
+                        ) : (
+                            <div
+                                className="participant-avatar-letter1"
+                                onClick={() => navigate(`/profile/${userId}`)}
+                            >
+                                {recipientData?.name?.charAt(0) || 'U'}
+                            </div>
+                        )}
+                        <h1>{recipientData?.name || 'Пользователь'}</h1>
                     </div>
                 </div>
-            </div>
 
-            <div className="messages-container">
-                {messages.length === 0 ? (
-                    <div className="empty-chat">Нет сообщений. Начните общение!</div>
-                ) : (
-                    messages.map((msg) => (
-                        <div
-                            key={msg.id}
-                            className={`message ${msg.from === currentUser.uid ? 'sent' : 'received'}`}
-                        >
-                            <div className="message-content">
-                                {msg.fileData && (
-                                    <div className="message-attachment">
-                                        {msg.fileType === 'image' ? (
-                                            <img
-                                                src={msg.fileData}
-                                                alt="Прикрепленное изображение"
-                                                className="attachment-image"
-                                            />
-                                        ) : (
-                                            <div className="file-card">
-                                                <div className="file-icon">{getFileIcon(msg.fileName)}</div>
-                                                <div className="file-details">
-                                                    <div className="file-name">{msg.fileName}</div>
-                                                    <div className="file-size">{(msg.fileSize / 1024).toFixed(1)} KB</div>
-                                                    <a href={msg.fileData} download={msg.fileName} className="download-link">
-                                                        Скачать
-                                                    </a>
-                                                </div>
-                                            </div>
-                                        )}
-                                    </div>
-                                )}
-                                {msg.text && <div className="message-text">{msg.text}</div>}
-                                <div className="message-time">
-                                    {formatTime(msg.timestamp?.toDate() || new Date())}
-                                </div>
-                            </div>
-                        </div>
-                    ))
+                {fullscreenImage && (
+                    <div className="fullscreen-overlay" onClick={() => setFullscreenImage(null)}>
+                        <img
+                            src={fullscreenImage}
+                            alt="Полноэкранное изображение"
+                            className="fullscreen-image"
+                            onClick={(e) => e.stopPropagation()}
+                        />
+                        <button className="close-btn" onClick={() => setFullscreenImage(null)}>×</button>
+                    </div>
                 )}
-                <div ref={messagesEndRef} />
-            </div>
 
-            {preview && (
-                <div className="file-preview">
-                    {preview !== 'file' ? (
-                        <img src={preview} alt="Превью" className="preview-image" />
-                    ) : (
-                        <div className="preview-file">
-                            {getFileIcon(file.name)} {file.name}
+                <div className="messages-container" ref={messagesContainerRef}>
+                    {messages.length === 0 && (
+                        <div className="empty-chat">
+                            <p>Чат пока пуст. Начните общение!</p>
                         </div>
                     )}
-                    <button type="button" onClick={removeFile} className="remove-file-btn">×</button>
-                </div>
-            )}
 
-            <form onSubmit={handleSendMessage} className="message-form">
-                <div className="input-group">
-                    <label className="file-upload-btn">
+                    {preview && (
+                        <div className="file-preview">
+                            {preview !== 'file' ? (
+                                <img src={preview} alt="Превью" className="preview-image" />
+                            ) : (
+                                <div className="preview-file">
+                                    {getFileIcon(file.name)} {file.name}
+                                </div>
+                            )}
+                            <button type="button" onClick={removeFile} className="remove-file-btn">×</button>
+                        </div>
+                    )}
+
+                    {!preview && groupedMessages.map((item) => {
+                        if (item.type === 'date') {
+                            return (
+                                <div key={item.id} className="date-separator">
+                                    {item.dateStr}
+                                </div>
+                            );
+                        } else {
+                            const isOwn = item.from === currentUser.uid;
+                            const msgDate = item.timestamp?.toDate ? item.timestamp.toDate() : new Date();
+                            return (
+                                <div
+                                    key={item.id}
+                                    className={`message ${isOwn ? 'sent' : 'received'}`}
+                                >
+                                    <div className="message-content">
+                                        <div className="message-sender">
+                                            {isOwn ? 'Вы' : recipientData?.name || 'Пользователь'}
+                                        </div>
+                                        {item.fileData && (
+                                            <div className="message-attachment">
+                                                {item.fileType === 'image' ? (
+                                                    <img
+                                                        src={item.fileData}
+                                                        alt="Прикрепленное изображение"
+                                                        className="attachment-image"
+                                                        onClick={() => setFullscreenImage(item.fileData)}
+                                                    />
+                                                ) : (
+                                                    <div className="file-card">
+                                                        <div className="file-icon">{getFileIcon(item.fileName)}</div>
+                                                        <div className="file-details">
+                                                            <div className="file-name">{item.fileName}</div>
+                                                            <div className="file-size">{(item.fileSize / 1024).toFixed(1)} KB</div>
+                                                            <a href={item.fileData} download={item.fileName} className="download-link">
+                                                                Скачать
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+
+                                        {item.text && <div className="message-text">{item.text}</div>}
+
+                                        <div className={isOwn ? "message-time-sender" : "message-time"}>{formatTime(msgDate)}</div>
+                                    </div>
+                                </div>
+                            );
+                        }
+                    })}
+                    <div ref={messagesEndRef} />
+                </div>
+
+                <form onSubmit={handleSendMessage} className="message-form telegram-input">
+                    <div className="input-group">
                         <input
-                            type="file"
-                            onChange={handleFileChange}
-                            accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.zip,.rar,.7z"
-                            hidden
+                            type="text"
+                            value={newMessage}
+                            onChange={(e) => setNewMessage(e.target.value)}
+                            placeholder="Введите сообщение..."
+                            className="telegram-message-input"
                         />
-                        📎
-                    </label>
-                    <input
-                        type="text"
-                        value={newMessage}
-                        onChange={(e) => setNewMessage(e.target.value)}
-                        placeholder="Введите сообщение..."
-                        className="message-input"
-                    />
+                        <label className="file-upload-btn" title="Прикрепить файл">
+                            <input
+                                type="file"
+                                ref={fileInputRef}
+                                onChange={handleFileChange}
+                                accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.zip,.rar,.7z"
+                                hidden
+                            />
+                            📎
+                        </label>
+                    </div>
                     <button
                         type="submit"
-                        className="send-button"
                         disabled={!newMessage.trim() && !file}
+                        className="send-btn"
+                        title="Отправить сообщение"
                     >
-                        Отправить
+                        ➤
                     </button>
-                </div>
-            </form>
+                </form>
+            </div>
         </div>
     );
 }

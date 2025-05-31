@@ -5,15 +5,15 @@ import { useNavigate } from 'react-router-dom';
 import './CreateCourse.css';
 
 function CreateCourse({ user }) {
-    const [title, setTitle] = useState('');
-    const [description, setDescription] = useState('');
+    const [courseTitle, setTitle] = useState('');
+    const [courseDescription, setDescription] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState('');
     const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!title.trim()) {
+        if (!courseTitle.trim()) {
             setError('Название курса обязательно');
             return;
         }
@@ -21,8 +21,8 @@ function CreateCourse({ user }) {
         setIsSubmitting(true);
         try {
             await addDoc(collection(db, "courses"), {
-                title,
-                description,
+                courseTitle,
+                courseDescription,
                 teacherId: user.uid,
                 students: [],
                 assignments: [],
@@ -47,7 +47,7 @@ function CreateCourse({ user }) {
                     <input
                         id="title"
                         type="text"
-                        value={title}
+                        value={courseTitle}
                         onChange={(e) => {
                             setTitle(e.target.value);
                             setError('');
@@ -61,7 +61,7 @@ function CreateCourse({ user }) {
                     <textarea
                         id="description"
                         className="add-course-area"
-                        value={description}
+                        value={courseDescription}
                         onChange={(e) => setDescription(e.target.value)}
                         placeholder="Добавьте описание курса"
                         rows="4"

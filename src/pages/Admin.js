@@ -4,6 +4,7 @@ import RegistrationQR from './RegistrationQR';
 import './Admin.css';
 import {logout} from "../services/auth";
 import {useNavigate} from "react-router-dom";
+import ImportDataButton from "../components/Assignments/ImportDataButton";
 
 function Admin({ user }) {
     const [users, setUsers] = useState([]);
@@ -56,7 +57,6 @@ function Admin({ user }) {
     return (
         <div className="admin-page">
             <h1>Панель администратора</h1>
-
             <div style={{ marginBottom: '20px', display: "flex", justifyContent: "space-between" }}>
                 <button
                     className="qr-toggle-button"

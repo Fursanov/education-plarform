@@ -5,6 +5,7 @@ import { getUser } from '../services/firestore';
 import { Link } from 'react-router-dom';
 import { logout } from '../services/auth';
 import './Dashboard.css';
+import ImportDataButton from "../components/Assignments/ImportDataButton";
 
 function Dashboard({ user }) {
     const [userData, setUserData] = useState(null);
@@ -119,8 +120,8 @@ function Dashboard({ user }) {
                             <div className="courses-grid">
                                 {studentCourses.map(course => (
                                     <div key={course.id} className="course-card">
-                                        <h3>{course.title}</h3>
-                                        <p>{course.description || 'Описание отсутствует'}</p>
+                                        <h3>{course.courseTitle}</h3>
+                                        <p>{course.courseDescription || 'Описание отсутствует'}</p>
                                         <div className="course-actions">
                                             <Link to={`/assignments/${course.id}`}>Задания</Link>
                                             <Link to={`/chat/${course.id}`}>Чат</Link>
@@ -141,6 +142,7 @@ function Dashboard({ user }) {
                             <Link to="/create-course" className="btn btn-primary">
                                 Создать курс
                             </Link>
+                            <ImportDataButton user={user} />
                         </div>
 
                         {loadingTeacherCourses ? (
@@ -149,8 +151,8 @@ function Dashboard({ user }) {
                             <div className="courses-grid">
                                 {teacherCourses.map(course => (
                                     <div key={course.id} className="course-card">
-                                        <h3>{course.title}</h3>
-                                        <p>{course.description || 'Описание отсутствует'}</p>
+                                        <h3>{course.courseTitle}</h3>
+                                        <p>{course.courseDescription || 'Описание отсутствует'}</p>
                                         <div className="course-actions">
                                             <Link to={`/assignments/${course.id}`}>Задания</Link>
                                             <Link to={`/students/${course.id}`}>Студенты</Link>
