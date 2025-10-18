@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { login } from '../../services/auth';
-import { getUserById } from '../../services/firestore'; // функция получения данных юзера
+import { getUserById, updateLastLogin } from '../../services/firestore';
 import './Login.css';
 
 function Login() {
@@ -21,12 +21,15 @@ function Login() {
                 throw new Error("Пользователь не найден в базе данных");
             }
 
+            // Обновляем поле lastLoginAt
+            await updateLastLogin(uid);
+
             switch (userData.role) {
                 case 'admin':
                     navigate('/admin');
                     break;
                 case 'teacher':
-                    navigate('/teacher');
+                    navigate('/');
                     break;
                 default:
                     navigate('/');
@@ -36,7 +39,6 @@ function Login() {
             setError(err.message);
         }
     };
-
 
     return (
         <div className="auth-container">

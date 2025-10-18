@@ -3,14 +3,13 @@ import { collection, query, where, getDocs, doc, getDoc, updateDoc } from 'fireb
 import { db } from '../services/firebase';
 import './Students.css';
 import { useParams, useNavigate } from 'react-router-dom';
+import LoadingSpinner from "../components/UI/LoadingSpinner";
 
 function Students({ user }) {
     const [courses, setCourses] = useState([]);
     const [selectedCourse, setSelectedCourse] = useState(null);
-
-    const [courseStudents, setCourseStudents] = useState([]); // Студенты в курсе
-    const [allStudents, setAllStudents] = useState([]);       // Все студенты из базы
-
+    const [courseStudents, setCourseStudents] = useState([]);
+    const [allStudents, setAllStudents] = useState([]);
     const [searchTermCourse, setSearchTermCourse] = useState('');
     const [searchTermAll, setSearchTermAll] = useState('');
     const [isLoading, setIsLoading] = useState(true);
@@ -18,7 +17,6 @@ function Students({ user }) {
     const { courseId } = useParams();
     const navigate = useNavigate();
 
-    // Загружаем курсы учителя
     useEffect(() => {
         const fetchCourses = async () => {
             setIsLoading(true);
@@ -41,7 +39,6 @@ function Students({ user }) {
         fetchCourses();
     }, [user, courseId]);
 
-    // Загружаем всех студентов (роль "student")
     useEffect(() => {
         const fetchAllStudents = async () => {
             setIsLoading(true);
@@ -57,7 +54,6 @@ function Students({ user }) {
         fetchAllStudents();
     }, []);
 
-    // Загружаем студентов выбранного курса
     useEffect(() => {
         if (!selectedCourse) {
             setCourseStudents([]);
@@ -85,7 +81,6 @@ function Students({ user }) {
         fetchCourseStudents();
     }, [selectedCourse]);
 
-    // Добавить студента в курс
     const addStudentToCourse = async (studentId) => {
         if (!selectedCourse) {
             alert('Выберите курс');
@@ -104,7 +99,6 @@ function Students({ user }) {
             await updateDoc(courseRef, { students: updatedStudents });
             setSelectedCourse(prev => ({ ...prev, students: updatedStudents }));
 
-            // Обновляем локальный список студентов курса сразу
             const addedStudent = allStudents.find(s => s.id === studentId);
             if (addedStudent) {
                 setCourseStudents(prev => [...prev, addedStudent]);
@@ -118,7 +112,6 @@ function Students({ user }) {
         }
     };
 
-    // Удалить студента из курса (твоя реализация)
     const removeStudent = async (studentId) => {
         if (!selectedCourse) return;
 
@@ -138,36 +131,48 @@ function Students({ user }) {
         }
     };
 
-    // Фильтрация студентов по поиску
     const filteredCourseStudents = courseStudents.filter(s =>
-        s.name?.toLowerCase().includes(searchTermCourse.toLowerCase()) ||
-        s.email?.toLowerCase().includes(searchTermCourse.toLowerCase())
+                                                             s.name?.toLowerCase().includes(searchTermCourse.toLowerCase()) ||
+                                                             s.email?.toLowerCase().includes(searchTermCourse.toLowerCase())
     );
 
-    // Все студенты, кроме тех, кто уже в курсе
     const filteredAllStudents = allStudents
         .filter(s => !selectedCourse?.students?.includes(s.id))
         .filter(s =>
-            s.name?.toLowerCase().includes(searchTermAll.toLowerCase()) ||
-            s.email?.toLowerCase().includes(searchTermAll.toLowerCase())
+                    s.name?.toLowerCase().includes(searchTermAll.toLowerCase()) ||
+                    s.email?.toLowerCase().includes(searchTermAll.toLowerCase())
         );
 
-    if (isLoading && !selectedCourse) return <div className="loading">Загрузка курсов...</div>;
+    if (isLoading && !selectedCourse) {
+        return (
+            <div className="app-loading">
+                <LoadingSpinner />
+                <p>Загрузка курсов...</p>
+            </div>
+        );
+    }
 
     return (
-        <div className="students-page">
-            <button className="btn back-btn" onClick={() => navigate(-1)}>← Вернуться</button>
+        <div className="students-management">
+            <button
+                className="students-management__back-btn"
+                onClick={() => navigate(-1)}
+            >
+                ← Вернуться
+            </button>
 
-            <h1>Управление студентами</h1>
+            <h1 className="students-management__title">Управление студентами</h1>
 
-            <div className="course-selection">
+            <div className="students-management__course-selection">
                 <h2>Выберите курс</h2>
-                <div className="course-buttons">
+                <div className="students-management__course-buttons">
                     {courses.map(course => (
                         <button
                             key={course.id}
                             onClick={() => setSelectedCourse(course)}
-                            className={selectedCourse?.id === course.id ? 'active' : ''}
+                            className={`students-management__course-btn ${
+                                selectedCourse?.id === course.id ? 'students-management__course-btn--active' : ''
+                            }`}
                         >
                             {course.courseTitle}
                         </button>
@@ -176,30 +181,35 @@ function Students({ user }) {
             </div>
 
             {selectedCourse && (
-                <div className="students-container" style={{ display: 'flex', gap: '40px' }}>
+                <div className="students-management__container">
                     {/* Студенты курса */}
-                    <div className="students-list-block" style={{ flex: 1 }}>
-                        <h2>Студенты курса: {selectedCourse.title}</h2>
+                    <div className="students-management__list-block">
+                        <h2 className="students-management__list-title">
+                            Студенты курса: {selectedCourse.courseTitle}
+                        </h2>
                         <input
                             type="text"
                             placeholder="Поиск студентов курса..."
                             value={searchTermCourse}
                             onChange={e => setSearchTermCourse(e.target.value)}
-                            style={{ marginBottom: '10px', width: '100%' }}
+                            className="students-management__search"
                         />
                         {filteredCourseStudents.length > 0 ? (
                             filteredCourseStudents.map(student => (
-                                <div key={student.id} className="student-card">
-                                    <div className="student-info">
-                                        <span>{student.name}</span>
-                                        <span>{student.email}</span>
+                                <div key={student.id} className="students-management__student-card">
+                                    <div className="students-management__student-info">
+                                        <span className="students-management__student-name">{student.name}</span>
+                                        <span className="students-management__student-email">{student.email}</span>
                                     </div>
-                                    <div className="student-actions">
-                                        <a href={`/profile/${student.id}`} className="btn profile-btn">
+                                    <div className="students-management__student-actions">
+                                        <a
+                                            href={`/profile/${student.id}`}
+                                            className="students-management__btn students-management__btn--profile"
+                                        >
                                             Профиль
                                         </a>
                                         <button
-                                            className="btn remove-btn"
+                                            className="students-management__btn students-management__btn--remove"
                                             onClick={() => removeStudent(student.id)}
                                         >
                                             Удалить
@@ -208,30 +218,32 @@ function Students({ user }) {
                                 </div>
                             ))
                         ) : (
-                            <p>Студенты не найдены</p>
+                            <div className="students-management__empty-state">
+                                <p>Студенты не найдены</p>
+                            </div>
                         )}
                     </div>
 
                     {/* Все студенты */}
-                    <div className="students-list-block" style={{ flex: 1 }}>
-                        <h2>Все студенты</h2>
+                    <div className="students-management__list-block">
+                        <h2 className="students-management__list-title">Все студенты</h2>
                         <input
                             type="text"
                             placeholder="Поиск по всем студентам..."
                             value={searchTermAll}
                             onChange={e => setSearchTermAll(e.target.value)}
-                            style={{ marginBottom: '10px', width: '100%' }}
+                            className="students-management__search"
                         />
                         {filteredAllStudents.length > 0 ? (
                             filteredAllStudents.map(student => (
-                                <div key={student.id} className="student-card">
-                                    <div className="student-info">
-                                        <span>{student.name}</span>
-                                        <span>{student.email}</span>
+                                <div key={student.id} className="students-management__student-card">
+                                    <div className="students-management__student-info">
+                                        <span className="students-management__student-name">{student.name}</span>
+                                        <span className="students-management__student-email">{student.email}</span>
                                     </div>
-                                    <div className="student-actions">
+                                    <div className="students-management__student-actions">
                                         <button
-                                            className="btn add-btn"
+                                            className="students-management__btn students-management__btn--add"
                                             onClick={() => addStudentToCourse(student.id)}
                                             disabled={isLoading}
                                         >
@@ -241,7 +253,9 @@ function Students({ user }) {
                                 </div>
                             ))
                         ) : (
-                            <p>Нет доступных студентов для добавления</p>
+                            <div className="students-management__empty-state">
+                                <p>Нет доступных студентов для добавления</p>
+                            </div>
                         )}
                     </div>
                 </div>

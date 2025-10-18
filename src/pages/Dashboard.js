@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
-import { collection, getDocs, query, where } from 'firebase/firestore';
+import { collection, getDocs, query, Timestamp, where } from 'firebase/firestore';
 import { db } from '../services/firebase'; // поправь путь под себя
-import { getUser } from '../services/firestore';
+import { getUser, updateUser } from '../services/firestore';
 import { Link } from 'react-router-dom';
 import { logout } from '../services/auth';
 import './Dashboard.css';
 import ImportDataButton from "../components/Assignments/ImportDataButton";
+import LoadingSpinner from "../components/UI/LoadingSpinner";
 
 function Dashboard({ user }) {
     const [userData, setUserData] = useState(null);
@@ -21,6 +22,9 @@ function Dashboard({ user }) {
             try {
                 const data = await getUser(user.uid);
                 setUserData(data);
+
+                // Обновляем lastLoginAt при каждом заходе
+                await updateUser(user.uid, { lastLoginAt: Timestamp.now() });
             } catch (error) {
                 console.error("Ошибка загрузки данных пользователя:", error);
             } finally {
@@ -28,7 +32,9 @@ function Dashboard({ user }) {
             }
         };
 
-        fetchUserData();
+        if (user) {
+            fetchUserData();
+        }
     }, [user]);
 
     useEffect(() => {
@@ -40,15 +46,15 @@ function Dashboard({ user }) {
         const fetchCoursesForStudent = async () => {
             setLoadingStudentCourses(true);
             try {
-                const coursesSnapshot = await getDocs(collection(db, 'courses'));
-                const coursesList = [];
-                coursesSnapshot.forEach(doc => {
+                const snapshot = await getDocs(collection(db, 'courses'));
+                const courses = [];
+                snapshot.forEach(doc => {
                     const course = { id: doc.id, ...doc.data() };
-                    if (course.students && course.students.includes(user.uid)) {
-                        coursesList.push(course);
+                    if (course.students?.includes(user.uid)) {
+                        courses.push(course);
                     }
                 });
-                setStudentCourses(coursesList);
+                setStudentCourses(courses);
             } catch (error) {
                 console.error("Ошибка загрузки курсов:", error);
             } finally {
@@ -69,12 +75,10 @@ function Dashboard({ user }) {
             setLoadingTeacherCourses(true);
             try {
                 const q = query(collection(db, "courses"), where("teacherId", "==", user.uid));
-                const querySnapshot = await getDocs(q);
-                const coursesList = [];
-                querySnapshot.forEach((doc) => {
-                    coursesList.push({ id: doc.id, ...doc.data() });
-                });
-                setTeacherCourses(coursesList);
+                const snapshot = await getDocs(q);
+                const courses = [];
+                snapshot.forEach(doc => courses.push({ id: doc.id, ...doc.data() }));
+                setTeacherCourses(courses);
             } catch (error) {
                 console.error("Ошибка загрузки курсов преподавателя:", error);
             } finally {
@@ -94,35 +98,47 @@ function Dashboard({ user }) {
         }
     };
 
-    if (loadingUser) return <div className="loading">Загрузка...</div>;
+    if (loadingUser) {
+        return (
+            <div className="dashboard__app-loading">
+                <LoadingSpinner />
+                <p>Загрузка...</p>
+            </div>
+        );
+    }
 
     return (
         <div className="dashboard">
-            <div className="dashboard-header">
-                <h1>
+            <div className="dashboard__header">
+                <h1 className="dashboard__title">
                     Добро пожаловать, {userData?.name}
-                    <span className={`role-tag ${userData?.role}`}>
+                    <span className={`dashboard__role-tag dashboard__role-tag--${userData?.role}`}>
                         {userData?.role === 'student' && 'Обучающийся'}
                         {userData?.role === 'teacher' && 'Преподаватель'}
                         {userData?.role === 'admin' && 'Администратор'}
                     </span>
                 </h1>
-                <button onClick={handleLogout} className="btn logout-btn">Выйти</button>
+                <button onClick={handleLogout} className="dashboard__btn dashboard__logout-btn">
+                    Выйти
+                </button>
             </div>
 
-            <div className="role-info">
+            <div className="dashboard__role-info">
                 {userData?.role === 'student' && (
                     <div>
                         <h2>Ваши курсы</h2>
                         {loadingStudentCourses ? (
-                            <p>Загрузка курсов...</p>
+                            <div className="dashboard__app-loading">
+                                <LoadingSpinner />
+                                <p>Загрузка курсов...</p>
+                            </div>
                         ) : studentCourses.length > 0 ? (
-                            <div className="courses-grid">
+                            <div className="dashboard__courses-grid">
                                 {studentCourses.map(course => (
-                                    <div key={course.id} className="course-card">
+                                    <div key={course.id} className="dashboard__course-card">
                                         <h3>{course.courseTitle}</h3>
                                         <p>{course.courseDescription || 'Описание отсутствует'}</p>
-                                        <div className="course-actions">
+                                        <div className="dashboard__course-actions">
                                             <Link to={`/assignments/${course.id}`}>Задания</Link>
                                             <Link to={`/chat/${course.id}`}>Чат</Link>
                                         </div>
@@ -137,23 +153,26 @@ function Dashboard({ user }) {
 
                 {userData?.role === 'teacher' && (
                     <div>
-                        <div className="teacher-header">
+                        <div className="dashboard__teacher-header">
                             <h2>Мои курсы</h2>
-                            <Link to="/create-course" className="btn btn-primary">
+                            <Link to="/create-course" className="dashboard__btn dashboard__btn-primary">
                                 Создать курс
                             </Link>
                             <ImportDataButton user={user} />
                         </div>
 
                         {loadingTeacherCourses ? (
-                            <p>Загрузка курсов...</p>
+                            <div className="dashboard__app-loading">
+                                <LoadingSpinner />
+                                <p>Загрузка курсов...</p>
+                            </div>
                         ) : teacherCourses.length > 0 ? (
-                            <div className="courses-grid">
+                            <div className="dashboard__courses-grid">
                                 {teacherCourses.map(course => (
-                                    <div key={course.id} className="course-card">
+                                    <div key={course.id} className="dashboard__course-card">
                                         <h3>{course.courseTitle}</h3>
                                         <p>{course.courseDescription || 'Описание отсутствует'}</p>
-                                        <div className="course-actions">
+                                        <div className="dashboard__course-actions">
                                             <Link to={`/assignments/${course.id}`}>Задания</Link>
                                             <Link to={`/students/${course.id}`}>Студенты</Link>
                                             <Link to={`/chat/${course.id}`}>Чат</Link>
@@ -164,17 +183,6 @@ function Dashboard({ user }) {
                         ) : (
                             <p>У вас пока нет созданных курсов.</p>
                         )}
-                    </div>
-                )}
-
-                {userData?.role === 'admin' && (
-                    <div>
-                        <h2>Административная панель</h2>
-                        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginTop: '1.5rem' }}>
-                            <Link to="/admin/users" className="btn btn-primary">Управление пользователями</Link>
-                            <Link to="/admin/courses" className="btn btn-primary">Управление курсами</Link>
-                            <Link to="/admin/analytics" className="btn btn-primary">Аналитика</Link>
-                        </div>
                     </div>
                 )}
             </div>

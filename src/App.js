@@ -7,7 +7,7 @@ import Register from './components/Auth/Register';
 import Dashboard from './pages/Dashboard';
 import Assignments from './pages/Assignments';
 import Chat from './pages/Chat';
-import Admin from './pages/Admin';
+import AdminPage from './pages/adminPages/AdminPage';
 import Navbar from './components/UI/Navbar';
 import Sidebar from './components/UI/Sidebar';
 import Footer from './components/UI/Footer';
@@ -20,6 +20,10 @@ import {doc, getDoc} from "firebase/firestore";
 import Profile from "./pages/Profile";
 import UserProfile from "./pages/UserProfile";
 import PrivateChat from "./pages/PrivateChat";
+import AdminCourses from "./pages/adminPages/AdminCourses";
+import AdminUsers from "./pages/adminPages/AdminUsers";
+import AdminAnalytics from "./pages/adminPages/AdminAnalytics";
+import FriendsAndChats from "./pages/FriendsAndChats";
 
 function App() {
   const [user, setUser] = useState(null);
@@ -76,7 +80,11 @@ function App() {
               <Route path="/video-call/:courseId" element={<VideoCall user={user} />} />
               <Route path="/assignments/:courseId" element={user ? <Assignments user={user} /> : <Navigate to="/login" />} />
               <Route path="/chat/:courseId" element={user ? <Chat userData={userData} user={user} /> : <Navigate to="/login" />} />
-              <Route path="/admin" element={user?.role === 'admin' ? <Admin user={user} /> : <Navigate to="/" />} />
+              <Route path="/admin" element={userData?.role === 'admin' ? <AdminPage user={user} /> : <Navigate to="/" />} />
+              <Route path="/admin/courses" element={userData?.role === 'admin' ? <AdminCourses user={user} /> : <Navigate to="/" />} />
+              <Route path="/admin/users" element={userData?.role === 'admin' ? <AdminUsers user={user} /> : <Navigate to="/" />} />
+              <Route path="/admin/analytics" element={userData?.role === 'admin' ? <AdminAnalytics user={user} /> : <Navigate to="/" />} />
+              <Route path="/friends" element={user ? <FriendsAndChats user={user} userData={userData} /> : <Navigate to="/login" />} />
               <Route path="/students/:courseId" element={user ? <Students user={user} /> : <Navigate to="/login" />} />
               <Route path="*" element={<Navigate to={user ? "/" : "/login"} />} />
             </Routes>

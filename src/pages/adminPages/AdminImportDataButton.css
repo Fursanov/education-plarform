@@ -1,0 +1,327 @@
+/* AdminImportDataButton.css */
+.admin-import-wrapper {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin: 1rem 0;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(5, 150, 105, 0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.admin-import-wrapper::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #065f46 0%, #059669 100%);
+}
+
+.admin-import-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #E2E8F0;
+}
+
+.admin-import-header h3 {
+    margin: 0;
+    color: #065f46;
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.download-template-btn {
+    padding: 0.5rem 1rem;
+    background: linear-gradient(135deg, #065f46 0%, #059669 100%);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    font-weight: 500;
+    box-shadow: 0 2px 6px rgba(6, 95, 70, 0.3);
+}
+
+.download-template-btn:hover {
+    background: linear-gradient(135deg, #05452f 0%, #065f46 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(6, 95, 70, 0.4);
+}
+
+.import-options {
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background: #f0fdf4;
+    border-radius: 8px;
+    border: 1px solid rgba(5, 150, 105, 0.2);
+}
+
+.option-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 500;
+    color: #065f46;
+    cursor: pointer;
+}
+
+.option-checkbox input[type="checkbox"] {
+    width: 1.1rem;
+    height: 1.1rem;
+    cursor: pointer;
+    accent-color: #059669;
+}
+
+.teacher-selection {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: white;
+    border-radius: 6px;
+    border: 1px solid rgba(5, 150, 105, 0.2);
+}
+
+.teacher-selection label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: #065f46;
+}
+
+.teacher-select {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #D1D5DB;
+    border-radius: 6px;
+    font-size: 1rem;
+    background: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.teacher-select:focus {
+    outline: none;
+    border-color: #059669;
+    box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
+}
+
+.import-controls {
+    margin-bottom: 1.5rem;
+}
+
+.admin-import-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem 1.5rem;
+    background: linear-gradient(135deg, #065f46 0%, #059669 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(6, 95, 70, 0.4);
+    position: relative;
+    overflow: hidden;
+}
+
+.admin-import-label::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.2) 50%,
+    transparent 100%);
+    transition: left 0.5s ease;
+}
+
+.admin-import-label:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(6, 95, 70, 0.5);
+    background: linear-gradient(135deg, #05452f 0%, #065f46 100%);
+}
+
+.admin-import-label:hover::before {
+    left: 100%;
+}
+
+.admin-import-label:active {
+    transform: translateY(0);
+}
+
+.admin-import-label:disabled {
+    background: #9CA3AF;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.admin-import-label:disabled::before {
+    display: none;
+}
+
+.admin-error-message {
+    padding: 1rem;
+    background: #FEF2F2;
+    border: 1px solid #FECACA;
+    border-radius: 6px;
+    color: #DC2626;
+    margin-bottom: 1rem;
+    font-weight: 500;
+    border-left: 4px solid #DC2626;
+}
+
+.admin-success-message {
+    padding: 1rem;
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    border-radius: 6px;
+    color: #065f46;
+    margin-bottom: 1rem;
+    font-weight: 500;
+    border-left: 4px solid #059669;
+}
+
+.import-info {
+    padding: 1rem;
+    background: #f8fafc;
+    border-radius: 8px;
+    border: 1px solid rgba(5, 150, 105, 0.1);
+}
+
+.import-info h4 {
+    margin: 0 0 0.75rem 0;
+    color: #065f46;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.import-info ul {
+    margin: 0;
+    padding-left: 1.5rem;
+    color: #4B5563;
+}
+
+.import-info li {
+    margin-bottom: 0.5rem;
+    line-height: 1.4;
+}
+
+.import-info code {
+    background: #E5E7EB;
+    padding: 0.1rem 0.3rem;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    color: #374151;
+    font-family: 'Monaco', 'Consolas', monospace;
+}
+
+/* Анимации */
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.7; }
+    100% { opacity: 1; }
+}
+
+.admin-import-label:disabled {
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.admin-import-wrapper {
+    animation: slideIn 0.4s ease-out;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .admin-import-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .admin-import-wrapper {
+        padding: 1rem;
+    }
+
+    .admin-import-label {
+        width: 100%;
+        justify-content: center;
+        text-align: center;
+    }
+
+    .download-template-btn {
+        width: 100%;
+        text-align: center;
+    }
+
+    .teacher-select {
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .admin-import-header h3 {
+        font-size: 1.1rem;
+    }
+
+    .admin-import-label {
+        padding: 0.875rem 1.25rem;
+        font-size: 0.95rem;
+    }
+
+    .import-info {
+        padding: 0.875rem;
+    }
+
+    .import-info ul {
+        padding-left: 1.25rem;
+    }
+}
+
+/* Дополнительные стили для улучшения UX */
+.option-checkbox:hover {
+    color: #05452f;
+}
+
+.teacher-select option {
+    padding: 0.5rem;
+}
+
+.admin-import-label input[type="file"] {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    opacity: 0;
+    cursor: pointer;
+}
+
+/* Стили для состояния загрузки */
+.admin-import-label:disabled {
+    background: linear-gradient(135deg, #9CA3AF 0%, #6B7280 100%);
+}

@@ -5,6 +5,7 @@ import { addUser } from '../../services/firestore';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../../services/firebase';
 import './Register.css';
+import LoadingSpinner from "../UI/LoadingSpinner";
 
 function useQuery() {
     return new URLSearchParams(useLocation().search);
@@ -14,10 +15,10 @@ function Register() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [name, setName] = useState('');
-    const [role, setRole] = useState('student'); // роль подтянется из приглашения
+    const [role, setRole] = useState('student');
     const [inviteId, setInviteId] = useState(null);
     const [error, setError] = useState('');
-    const [loadingInvite, setLoadingInvite] = useState(true); // статус загрузки приглашения
+    const [loadingInvite, setLoadingInvite] = useState(true);
     const navigate = useNavigate();
     const query = useQuery();
 
@@ -70,6 +71,8 @@ function Register() {
         e.preventDefault();
         try {
             const userCredential = await register(email, password);
+
+            // Используем обновленную функцию addUser
             await addUser(userCredential.user.uid, email, role, name);
 
             if (inviteId) {
@@ -83,7 +86,7 @@ function Register() {
                     navigate('/admin');
                     break;
                 case 'teacher':
-                    navigate('/teacher');
+                    navigate('/');
                     break;
                 default:
                     navigate('/');
@@ -95,7 +98,7 @@ function Register() {
     };
 
     if (loadingInvite) {
-        return <div>Проверка приглашения...</div>;
+        return <div className="loading"><LoadingSpinner /> Проверка приглашения...</div>;
     }
 
     if (error) {
@@ -127,7 +130,6 @@ function Register() {
                     onChange={(e) => setPassword(e.target.value)}
                     required
                 />
-                {/* Роль берётся из приглашения, пользователь её не выбирает */}
                 <p>Ваша роль: <b>{role}</b></p>
 
                 <button type="submit">Зарегистрироваться</button>

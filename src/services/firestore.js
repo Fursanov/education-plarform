@@ -14,24 +14,40 @@ import {
     where,
     limit,
     startAt,
-    endAt
+    endAt,
+    Timestamp
 } from "firebase/firestore";
 
-export const getUserById = async (uid) => {
-    const docRef = doc(db, 'users', uid);
-    const docSnap = await getDoc(docRef);
-    return docSnap.exists() ? { id: docSnap.id, ...docSnap.data() } : null;
-};
-
-
-// Добавление пользователя
-export const addUser = async (uid, email, role, name) => {
+// Обновленная функция добавления пользователя
+export const addUser = async (uid, email, role, name, additionalData = {}) => {
     await setDoc(doc(db, "users", uid), {
         email,
         role,
         name,
-        courses: []
+        courses: [],
+        createdAt: Timestamp.now(),
+        lastLoginAt: Timestamp.now(),
+        ...additionalData
     });
+};
+
+// Функция для обновления lastLoginAt
+export const updateLastLogin = async (userId) => {
+    try {
+        await updateDoc(doc(db, 'users', userId), {
+            lastLoginAt: Timestamp.now()
+        });
+    } catch (error) {
+        console.error('Error updating last login:', error);
+        throw error;
+    }
+};
+
+// Остальные функции остаются без изменений
+export const getUserById = async (uid) => {
+    const docRef = doc(db, 'users', uid);
+    const docSnap = await getDoc(docRef);
+    return docSnap.exists() ? { id: docSnap.id, ...docSnap.data() } : null;
 };
 
 export const checkIfFriend = async (uid, friendId) => {
@@ -53,7 +69,7 @@ export const getFriends = async (uid) => {
 
     const friendIds = [];
     snapshot.forEach(doc => {
-        friendIds.push(doc.id); // friendId — это id документа
+        friendIds.push(doc.id);
     });
 
     return friendIds;
@@ -80,7 +96,7 @@ export const getPrivateMessages = async (userId1, userId2) => {
 export const getUsersByIds = async (ids) => {
     if (!ids || ids.length === 0) return [];
 
-    const chunkSize = 10; // Firestore поддерживает только 10 элементов в `in`
+    const chunkSize = 10;
     const users = [];
 
     for (let i = 0; i < ids.length; i += chunkSize) {
@@ -97,7 +113,6 @@ export const getUsersByIds = async (ids) => {
 
     return users;
 };
-
 
 export const searchUsersByNameOrTag = async (searchTerm) => {
     const usersRef = collection(db, 'users');
@@ -135,21 +150,17 @@ export const searchUsersByNameOrTag = async (searchTerm) => {
     return Array.from(usersMap.values());
 };
 
-
-// Получение пользователя
 export const getUser = async (uid) => {
     const docRef = doc(db, "users", uid);
     const docSnap = await getDoc(docRef);
     return docSnap.exists() ? docSnap.data() : null;
 };
 
-// Получение всех пользователей
 export const getAllUsers = async () => {
     const querySnapshot = await getDocs(collection(db, "users"));
     return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 };
 
-// Работа с чатом
 export const getChatMessages = (courseId, callback) => {
     const q = query(
         collection(db, `courses/${courseId}/messages`),
@@ -181,7 +192,6 @@ export const updateUser = async (userId, data) => {
 
 export const getChatParticipants = async (courseId) => {
     try {
-        // 1. Получаем данные о курсе
         const courseRef = doc(db, 'courses', courseId);
         const courseSnap = await getDoc(courseRef);
 
@@ -189,22 +199,18 @@ export const getChatParticipants = async (courseId) => {
             return getAllUsers();
 
         if (!courseSnap.exists()) {
-            console.log('Course not found');
+            console.error('Course not found');
             return [];
         }
 
         const courseData = courseSnap.data();
-
-        // 2. Собираем всех участников: преподаватель + студенты
         const participantsIds = [
-            courseData.teacherId, // добавляем преподавателя
-            ...(courseData.students || []) // добавляем студентов
-        ].filter(id => id); // убираем возможные undefined/null
+            courseData.teacherId,
+            ...(courseData.students || [])
+        ].filter(id => id);
 
-        // 3. Удаляем дубликаты (на случай если teacherId есть в students)
         const uniqueIds = [...new Set(participantsIds)];
 
-        // 4. Получаем данные каждого пользователя
         const participants = await Promise.all(
             uniqueIds.map(async (userId) => {
                 const userRef = doc(db, 'users', userId);
@@ -225,7 +231,6 @@ export const getChatParticipants = async (courseId) => {
             })
         );
 
-        // 5. Фильтруем возможные null (если пользователь не найден)
         return participants.filter(p => p !== null);
 
     } catch (error) {
@@ -234,36 +239,29 @@ export const getChatParticipants = async (courseId) => {
     }
 };
 
-// Добавляем функцию для получения чатов пользователя
 export const getUserChats = async (userId, isTeacher, isAdmin = false) => {
     try {
         const coursesRef = collection(db, 'courses');
-
-        // Запрашиваем курсы, в которых пользователь — студент
         const studentQuery = query(coursesRef, where('students', 'array-contains', userId));
         const studentCoursesSnapshot = await getDocs(studentQuery);
 
-        // Если преподаватель — добавляем также курсы по teacherId
         let allDocs = [...studentCoursesSnapshot.docs];
 
         if (isTeacher) {
             const teacherQuery = query(coursesRef, where('teacherId', '==', userId));
             const teacherCoursesSnapshot = await getDocs(teacherQuery);
 
-            // Объединяем и удаляем дубликаты по course ID
             const courseMap = new Map();
             allDocs.forEach(doc => courseMap.set(doc.id, doc));
             teacherCoursesSnapshot.docs.forEach(doc => courseMap.set(doc.id, doc));
             allDocs = Array.from(courseMap.values());
         }
 
-        // Сбор информации по каждому курсу
         const chats = await Promise.all(
             allDocs.map(async (courseDoc) => {
                 const courseData = courseDoc.data();
                 const courseId = courseDoc.id;
 
-                // Последнее сообщение
                 let lastMessage = '';
                 try {
                     const messagesQuery = query(
@@ -287,7 +285,6 @@ export const getUserChats = async (userId, isTeacher, isAdmin = false) => {
                     console.error(`Error loading messages for ${courseId}:`, e);
                 }
 
-                // Имя преподавателя
                 let teacherName = 'Преподаватель';
                 try {
                     if (courseData.teacherId) {
@@ -312,7 +309,6 @@ export const getUserChats = async (userId, isTeacher, isAdmin = false) => {
             })
         );
 
-        // Сортировка по дате создания
         return chats.sort((a, b) => b.createdAt - a.createdAt);
 
     } catch (error) {

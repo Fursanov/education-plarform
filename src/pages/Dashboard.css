@@ -1,49 +1,67 @@
-/* Dashboard.css */
 .dashboard {
     max-width: 1200px;
     margin: 2rem auto;
     padding: 2rem;
     font-family: 'Inter', sans-serif;
     color: #2D3748;
+    animation: dashboard__fadeIn 0.6s ease-out forwards;
 }
 
-.dashboard h1 {
-    font-size: 2.5rem;
-    font-weight: 700;
-    margin-bottom: 1.5rem;
-    color: #2D3748;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-}
-
-.dashboard-header {
+.dashboard__header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 3rem;
     padding-bottom: 1.5rem;
-    border-bottom: 1px solid #E2E8F0;
+    border-bottom: 1px solid rgba(5, 150, 105, 0.2);
 }
 
-.role-info {
+.dashboard__title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    background: linear-gradient(135deg, #065f46 0%, #059669 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+/* Role info */
+.dashboard__role-info {
     background: white;
     border-radius: 16px;
     padding: 2.5rem;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
     margin-top: 2rem;
+    border: 1px solid rgba(5, 150, 105, 0.1);
+    position: relative;
+    overflow: hidden;
 }
 
-.role-info h2 {
+.dashboard__role-info::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #065f46 0%, #059669 100%);
+}
+
+.dashboard__role-info h2 {
     font-size: 1.75rem;
     margin-bottom: 1.5rem;
-    color: #4F46E5;
+    color: #065f46;
     display: flex;
     align-items: center;
+    font-weight: 600;
 }
 
-/* Общие стили кнопок */
-.btn {
+/* Buttons */
+.dashboard__btn {
     padding: 0.75rem 1.5rem;
     border-radius: 12px;
     font-weight: 600;
@@ -53,137 +71,225 @@
     text-decoration: none;
     display: inline-block;
     text-align: center;
-}
-
-.btn-primary {
-    background: linear-gradient(90deg, #4F46E5 0%, #10B981 100%);
-    color: white;
     border: none;
 }
 
-.btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(79, 70, 229, 0.3);
+.dashboard__btn-primary {
+    background: linear-gradient(135deg, #065f46 0%, #059669 100%);
+    color: white;
+    box-shadow: 0 2px 8px rgba(6, 95, 70, 0.3);
 }
 
-.logout-btn {
+.dashboard__btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(6, 95, 70, 0.4);
+    background: linear-gradient(135deg, #05452f 0%, #065f46 100%);
+}
+
+.dashboard__logout-btn {
     background: #FEE2E2;
     color: #DC2626;
-    border: none;
+    box-shadow: 0 1px 3px rgba(220, 38, 38, 0.2);
 }
 
-.logout-btn:hover {
+.dashboard__logout-btn:hover {
     background: #FECACA;
     transform: translateY(-2px);
-    box-shadow: 0 2px 10px rgba(220, 38, 38, 0.1);
+    box-shadow: 0 2px 6px rgba(220, 38, 38, 0.3);
 }
 
-/* Стили для ролей */
-.role-tag {
+/* Roles */
+.dashboard__role-tag {
+    -webkit-text-fill-color: initial !important;
     display: inline-block;
     padding: 0.25rem 0.75rem;
     border-radius: 9999px;
     font-size: 0.85rem;
     font-weight: 600;
     margin-left: 0.5rem;
+    border: 1px solid;
 }
 
-.role-tag.student {
+.dashboard__role-tag--student {
     background-color: #E0F2FE;
     color: #0369A1;
+    border-color: #0369A1;
 }
 
-.role-tag.teacher {
-    background-color: #D1FAE5;
-    color: #065F46;
+.dashboard__role-tag--teacher {
+    background-color: #f0fdf4;
+    color: #065f46;
+    border-color: #059669;
 }
 
-.role-tag.admin {
+.dashboard__role-tag--admin {
     background-color: #FEE2E2;
-    color: #991B1B;
+    color: #dc2626;
+    border-color: #dc2626;
 }
 
-/* Карточки курсов */
-.courses-grid {
+/* Courses */
+.dashboard__courses-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: 1.5rem;
     margin-top: 1.5rem;
 }
 
-.course-card {
+.dashboard__course-card {
     background: white;
     border-radius: 12px;
     padding: 1.5rem;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
     transition: all 0.3s ease;
-    border: 1px solid #E2E8F0;
-}
-
-.course-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-    border-color: #4F46E5;
-}
-
-.course-card h3 {
-    margin-top: 0;
-    color: #4F46E5;
-}
-
-.course-progress {
-    margin-top: 1rem;
-    height: 6px;
-    background: #E2E8F0;
-    border-radius: 3px;
+    border: 1px solid rgba(5, 150, 105, 0.1);
+    position: relative;
     overflow: hidden;
 }
 
-.course-progress-bar {
-    height: 100%;
-    background: linear-gradient(90deg, #4F46E5 0%, #10B981 100%);
-    border-radius: 3px;
+.dashboard__course-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #065f46 0%, #059669 100%);
 }
 
-/* Адаптивность */
+.dashboard__course-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(5, 150, 105, 0.1);
+    border-color: rgba(5, 150, 105, 0.3);
+}
+
+.dashboard__course-card h3 {
+    margin-top: 0;
+    color: #065f46;
+    font-weight: 600;
+}
+
+.dashboard__course-card p {
+    color: #64748B;
+    line-height: 1.5;
+    margin-bottom: 1rem;
+}
+
+.dashboard__course-actions {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.dashboard__course-actions a {
+    padding: 0.5rem 1rem;
+    background: linear-gradient(135deg, #065f46 0%, #059669 100%);
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    box-shadow: 0 1px 3px rgba(6, 95, 70, 0.3);
+}
+
+.dashboard__course-actions a:hover {
+    background: linear-gradient(135deg, #05452f 0%, #065f46 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(6, 95, 70, 0.4);
+}
+
+/* Teacher header */
+.dashboard__teacher-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.dashboard__teacher-header h2 {
+    margin-bottom: 0;
+    flex: 1;
+}
+
+/* Loading */
+.dashboard__app-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem;
+    gap: 1rem;
+}
+
+.dashboard__app-loading p {
+    color: #065f46;
+    font-weight: 500;
+    font-size: 1.1rem;
+}
+
+/* Messages */
+.dashboard__role-info p {
+    color: #64748B;
+    font-style: italic;
+    text-align: center;
+    padding: 2rem;
+    background: #f8fafc;
+    border-radius: 8px;
+    border: 1px dashed #D1D5DB;
+}
+
+/* Responsive */
 @media (max-width: 768px) {
     .dashboard {
         padding: 1.5rem;
     }
 
-    .dashboard h1 {
+    .dashboard__title {
         font-size: 2rem;
         flex-direction: column;
         align-items: flex-start;
         gap: 0.5rem;
     }
 
-    .dashboard-header {
+    .dashboard__header {
         flex-direction: column;
         align-items: flex-start;
         gap: 1rem;
     }
 
-    .role-info {
+    .dashboard__role-info {
         padding: 1.5rem;
+    }
+
+    .dashboard__teacher-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1rem;
+    }
+
+    .dashboard__teacher-header h2 {
+        text-align: center;
+    }
+
+    .dashboard__courses-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .dashboard__course-actions {
+        justify-content: center;
+    }
+
+    .dashboard__course-actions a {
+        flex: 1;
+        text-align: center;
+        min-width: 100px;
     }
 }
 
-/* Анимации */
-@keyframes fadeIn {
+/* Animations */
+@keyframes dashboard__fadeIn {
     from { opacity: 0; transform: translateY(10px); }
     to { opacity: 1; transform: translateY(0); }
-}
-
-.dashboard {
-    animation: fadeIn 0.6s ease-out forwards;
-}
-
-.loading {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    font-size: 1.5rem;
-    color: #64748B;
 }

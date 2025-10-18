@@ -15,7 +15,7 @@
     font-size: 2rem;
     font-weight: 700;
     margin-bottom: 2rem;
-    background: linear-gradient(90deg, #4F46E5 0%, #10B981 100%);
+    background: linear-gradient(90deg, #065f46 0%, #10B981 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }
@@ -50,8 +50,8 @@
 .auth-container input:focus,
 .auth-container select:focus {
     outline: none;
-    border-color: #4F46E5;
-    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
+    border-color: #059669;
+    box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.2);
     background-color: white;
 }
 
@@ -59,7 +59,7 @@
     padding: 1rem;
     border: none;
     border-radius: 12px;
-    background: linear-gradient(90deg, #4F46E5 0%, #10B981 100%);
+    background: linear-gradient(90deg, #065f46 0%, #10B981 100%);
     color: white;
     font-size: 1rem;
     font-weight: 600;
@@ -70,7 +70,7 @@
 
 .auth-container button:hover {
     transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(79, 70, 229, 0.3);
+    box-shadow: 0 5px 15px rgba(5, 150, 105, 0.3);
 }
 
 .auth-container p {
@@ -80,14 +80,14 @@
 }
 
 .auth-container a {
-    color: #4F46E5;
+    color: #059669;
     text-decoration: none;
     font-weight: 600;
     transition: color 0.2s;
 }
 
 .auth-container a:hover {
-    color: #10B981;
+    color: #065f46;
     text-decoration: underline;
 }
 
@@ -101,7 +101,7 @@
 }
 
 /* Стили для разных ролей */
-.role-tag {
+.role-tag1 {
     display: inline-block;
     padding: 0.25rem 0.75rem;
     border-radius: 9999px;
@@ -110,17 +110,17 @@
     margin-left: 0.5rem;
 }
 
-.role-tag.student {
+.role-tag1.student {
     background-color: #E0F2FE;
     color: #0369A1;
 }
 
-.role-tag.teacher {
+.role-tag1.teacher {
     background-color: #D1FAE5;
     color: #065F46;
 }
 
-.role-tag.admin {
+.role-tag1.admin {
     background-color: #FEE2E2;
     color: #991B1B;
 }

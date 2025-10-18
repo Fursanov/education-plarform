@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { getUser, addFriend, checkIfFriend } from '../services/firestore';
 import {Link, useParams} from 'react-router-dom';
 import './Profile.css';
+import LoadingSpinner from "../components/UI/LoadingSpinner";
 
 function UserProfile({ currentUser }) {
     const { userId } = useParams();
@@ -48,7 +49,14 @@ function UserProfile({ currentUser }) {
         }
     };
 
-    if (loading) return <div className="loading">Загрузка профиля...</div>;
+    if (loading) {
+        return (
+            <div className="app-loading">
+                <LoadingSpinner />
+                <p>Загрузка профиля...</p>
+            </div>
+        );
+    }
     if (error) return <div className="error">{error}</div>;
     if (!userData) return <div>Пользователь не найден</div>;
 

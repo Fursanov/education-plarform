@@ -15,7 +15,7 @@ function Navbar({ user, toggleSidebar }) {
                     className="navbar-brand"
                 >
                     <img src={logo} alt="EduPlatform Logo" className="navbar-logo" />
-                    EduPlatform
+                    Система повышения квалификации и переподготовки кадров
                 </Link>
                 <div className="navbar-links">
                     {user?.role === 'teacher' && (

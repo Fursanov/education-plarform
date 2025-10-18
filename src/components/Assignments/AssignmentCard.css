@@ -1,0 +1,114 @@
+.assignment-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(5, 150, 105, 0.1);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.assignment-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #065f46 0%, #059669 100%);
+}
+
+.assignment-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 6px 18px rgba(5, 150, 105, 0.1);
+}
+
+.assignment-card h3 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #065f46;
+}
+
+.assignment-card .description {
+    font-size: 0.95rem;
+    color: #64748B;
+    line-height: 1.5;
+    margin-bottom: 0.75rem;
+}
+
+.assignment-card .due-date {
+    font-size: 0.9rem;
+    color: #374151;
+    font-weight: 500;
+    margin-bottom: 1rem;
+}
+
+.file-link {
+    display: inline-block;
+    margin-top: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: linear-gradient(135deg, #065f46 0%, #059669 100%);
+    color: white;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    box-shadow: 0 1px 4px rgba(6, 95, 70, 0.3);
+}
+
+.file-link:hover {
+    background: linear-gradient(135deg, #05452f 0%, #065f46 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 3px 8px rgba(6, 95, 70, 0.4);
+}
+
+.assignment-actions {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 1.25rem;
+}
+
+.assignment-actions button {
+    flex: 1;
+    padding: 0.6rem 1rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.assignment-actions button:first-child {
+    background: #f0fdf4;
+    color: #065f46;
+    border: 1px solid #059669;
+}
+
+.assignment-actions button:first-child:hover {
+    background: #dcfce7;
+}
+
+.assignment-actions button:last-child {
+    background: #fee2e2;
+    color: #dc2626;
+    border: 1px solid #fca5a5;
+}
+
+.assignment-actions button:last-child:hover {
+    background: #fecaca;
+}
+
+/* адаптивность */
+@media (max-width: 768px) {
+    .assignment-card {
+        padding: 1rem;
+    }
+
+    .assignment-actions {
+        flex-direction: column;
+    }
+}

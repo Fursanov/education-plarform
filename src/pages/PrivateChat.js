@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { sendPrivateMessage, getPrivateMessages, getUser } from '../services/firestore';
-import './Chat.css';
+import './PrivateChat.css';
 import { format, isToday, isYesterday } from 'date-fns';
 import { ru } from 'date-fns/locale';
+import LoadingSpinner from "../components/UI/LoadingSpinner";
 
 function PrivateChat({ currentUser }) {
     const { userId } = useParams();
@@ -157,83 +158,114 @@ function PrivateChat({ currentUser }) {
 
         if (dateStr !== lastDate) {
             groupedMessages.push({
-                type: 'date',
-                id: `date-${dateStr}`,
-                dateStr
-            });
+                                     type: 'date',
+                                     id: `date-${dateStr}`,
+                                     dateStr
+                                 });
             lastDate = dateStr;
         }
 
         groupedMessages.push({
-            type: 'message',
-            ...msg
-        });
+                                 type: 'message',
+                                 ...msg
+                             });
     });
 
-    if (loading) return <div className="loading">Загрузка чата...</div>;
-    if (error) return <div className="error">{error}</div>;
+    if (loading) {
+        return (
+            <div className="app-loading">
+                <LoadingSpinner/>
+                <p>Загрузка чата...</p>
+            </div>
+        );
+    }
+
+    if (error) return <div className="private-chat__error">{error}</div>;
 
     return (
-        <div className="chat-page">
-            <div className="chat-main-content">
-                <div className="chat-header">
-                    <button onClick={() => navigate(-1)} className="back-button">← Назад</button>
-                    <div className="recipient-info">
+        <div className="private-chat">
+            <div className="private-chat__main">
+                <div className="private-chat__header">
+                    <button
+                        onClick={() => navigate(-1)}
+                        className="private-chat__back-button"
+                    >
+                        ← Назад
+                    </button>
+                    <div className="private-chat__recipient-info">
                         {recipientData?.avatar ? (
                             <img
                                 src={recipientData.avatar}
                                 alt={recipientData.name}
-                                className="participant-avatar-img1"
+                                className="private-chat__recipient-avatar private-chat__recipient-avatar-img"
                                 onClick={() => navigate(`/profile/${userId}`)}
                             />
                         ) : (
                             <div
-                                className="participant-avatar-letter1"
+                                className="private-chat__recipient-avatar private-chat__recipient-avatar-letter"
                                 onClick={() => navigate(`/profile/${userId}`)}
                             >
                                 {recipientData?.name?.charAt(0) || 'U'}
                             </div>
                         )}
-                        <h1>{recipientData?.name || 'Пользователь'}</h1>
+                        <h1 className="private-chat__recipient-name">
+                            {recipientData?.name || 'Пользователь'}
+                        </h1>
                     </div>
                 </div>
 
                 {fullscreenImage && (
-                    <div className="fullscreen-overlay" onClick={() => setFullscreenImage(null)}>
+                    <div
+                        className="private-chat__modal-overlay"
+                        onClick={() => setFullscreenImage(null)}
+                    >
                         <img
                             src={fullscreenImage}
                             alt="Полноэкранное изображение"
-                            className="fullscreen-image"
+                            className="private-chat__modal-image"
                             onClick={(e) => e.stopPropagation()}
                         />
-                        <button className="close-btn" onClick={() => setFullscreenImage(null)}>×</button>
+                        <button
+                            className="private-chat__modal-close"
+                            onClick={() => setFullscreenImage(null)}
+                        >
+                            ×
+                        </button>
                     </div>
                 )}
 
-                <div className="messages-container" ref={messagesContainerRef}>
+                <div className="private-chat__messages" ref={messagesContainerRef}>
                     {messages.length === 0 && (
-                        <div className="empty-chat">
-                            <p>Чат пока пуст. Начните общение!</p>
+                        <div className="private-chat__empty">
+                            <p className="private-chat__empty-text">
+                                Чат пока пуст. Начните общение!
+                            </p>
                         </div>
                     )}
 
                     {preview && (
-                        <div className="file-preview">
+                        <div className="private-chat__preview">
                             {preview !== 'file' ? (
-                                <img src={preview} alt="Превью" className="preview-image" />
+                                <img src={preview} alt="Превью" className="private-chat__preview-image" />
                             ) : (
-                                <div className="preview-file">
+                                <div className="private-chat__preview-file">
                                     {getFileIcon(file.name)} {file.name}
                                 </div>
                             )}
-                            <button type="button" onClick={removeFile} className="remove-file-btn">×</button>
+                            <button
+                                type="button"
+                                onClick={removeFile}
+                                className="private-chat__remove-button"
+                            >
+                                ×
+                            </button>
                         </div>
                     )}
 
                     {!preview && groupedMessages.map((item) => {
                         if (item.type === 'date') {
                             return (
-                                <div key={item.id} className="date-separator">
+                                <div key={item.id} className="private-chat__date-separator">
                                     {item.dateStr}
                                 </div>
                             );
@@ -243,28 +275,40 @@ function PrivateChat({ currentUser }) {
                             return (
                                 <div
                                     key={item.id}
-                                    className={`message ${isOwn ? 'sent' : 'received'}`}
+                                    className={`private-chat__message ${
+                                        isOwn ? 'private-chat__message--sent' : 'private-chat__message--received'
+                                    }`}
                                 >
-                                    <div className="message-content">
-                                        <div className="message-sender">
+                                    <div className="private-chat__message-content">
+                                        <div className="private-chat__message-sender">
                                             {isOwn ? 'Вы' : recipientData?.name || 'Пользователь'}
                                         </div>
                                         {item.fileData && (
-                                            <div className="message-attachment">
+                                            <div className="private-chat__attachment">
                                                 {item.fileType === 'image' ? (
                                                     <img
                                                         src={item.fileData}
                                                         alt="Прикрепленное изображение"
-                                                        className="attachment-image"
+                                                        className="private-chat__attachment-image"
                                                         onClick={() => setFullscreenImage(item.fileData)}
                                                     />
                                                 ) : (
-                                                    <div className="file-card">
-                                                        <div className="file-icon">{getFileIcon(item.fileName)}</div>
-                                                        <div className="file-details">
-                                                            <div className="file-name">{item.fileName}</div>
-                                                            <div className="file-size">{(item.fileSize / 1024).toFixed(1)} KB</div>
-                                                            <a href={item.fileData} download={item.fileName} className="download-link">
+                                                    <div className="private-chat__file-card">
+                                                        <div className="private-chat__file-icon">
+                                                            {getFileIcon(item.fileName)}
+                                                        </div>
+                                                        <div className="private-chat__file-details">
+                                                            <div className="private-chat__file-name">
+                                                                {item.fileName}
+                                                            </div>
+                                                            <div className="private-chat__file-size">
+                                                                {(item.fileSize / 1024).toFixed(1)} KB
+                                                            </div>
+                                                            <a
+                                                                href={item.fileData}
+                                                                download={item.fileName}
+                                                                className="private-chat__download-link"
+                                                            >
                                                                 Скачать
                                                             </a>
                                                         </div>
@@ -273,9 +317,15 @@ function PrivateChat({ currentUser }) {
                                             </div>
                                         )}
 
-                                        {item.text && <div className="message-text">{item.text}</div>}
+                                        {item.text && (
+                                            <div className="private-chat__message-text">
+                                                {item.text}
+                                            </div>
+                                        )}
 
-                                        <div className={isOwn ? "message-time-sender" : "message-time"}>{formatTime(msgDate)}</div>
+                                        <div className="private-chat__message-time">
+                                            {formatTime(msgDate)}
+                                        </div>
                                     </div>
                                 </div>
                             );
@@ -284,22 +334,25 @@ function PrivateChat({ currentUser }) {
                     <div ref={messagesEndRef} />
                 </div>
 
-                <form onSubmit={handleSendMessage} className="message-form telegram-input">
-                    <div className="input-group">
+                <form onSubmit={handleSendMessage} className="private-chat__form">
+                    <div className="private-chat__input-group">
                         <input
                             type="text"
                             value={newMessage}
                             onChange={(e) => setNewMessage(e.target.value)}
                             placeholder="Введите сообщение..."
-                            className="telegram-message-input"
+                            className="private-chat__input"
                         />
-                        <label className="file-upload-btn" title="Прикрепить файл">
+                        <label
+                            className="private-chat__button private-chat__button--file"
+                            title="Прикрепить файл"
+                        >
                             <input
                                 type="file"
                                 ref={fileInputRef}
                                 onChange={handleFileChange}
                                 accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.zip,.rar,.7z"
-                                hidden
+                                className="private-chat__file-input"
                             />
                             📎
                         </label>
@@ -307,7 +360,7 @@ function PrivateChat({ currentUser }) {
                     <button
                         type="submit"
                         disabled={!newMessage.trim() && !file}
-                        className="send-btn"
+                        className="private-chat__button private-chat__button--send"
                         title="Отправить сообщение"
                     >
                         ➤

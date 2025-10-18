@@ -11,10 +11,10 @@
     font-size: 2rem;
     font-weight: 700;
     margin-bottom: 2rem;
-    color: #2D3748;
-    background: linear-gradient(90deg, #4F46E5 0%, #10B981 100%);
+    background: linear-gradient(135deg, #065f46 0%, #059669 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
 .create-assignment {
@@ -23,12 +23,26 @@
     padding: 2rem;
     margin-bottom: 3rem;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(5, 150, 105, 0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.create-assignment::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #065f46 0%, #059669 100%);
 }
 
 .create-assignment h2 {
     font-size: 1.5rem;
     margin-bottom: 1.5rem;
-    color: #4F46E5;
+    color: #065f46;
+    font-weight: 600;
 }
 
 .create-assignment form {
@@ -66,8 +80,8 @@
 .create-assignment input:focus,
 .create-assignment textarea:focus {
     outline: none;
-    border-color: #4F46E5;
-    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
+    border-color: #059669;
+    box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.2);
     background-color: white;
 }
 
@@ -75,18 +89,20 @@
     padding: 1rem;
     border: none;
     border-radius: 12px;
-    background: linear-gradient(90deg, #4F46E5 0%, #10B981 100%);
+    background: linear-gradient(135deg, #065f46 0%, #059669 100%);
     color: white;
     font-size: 1rem;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
     margin-top: 0.5rem;
+    box-shadow: 0 2px 8px rgba(6, 95, 70, 0.3);
 }
 
 .create-assignment button:hover {
     transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(79, 70, 229, 0.3);
+    box-shadow: 0 4px 12px rgba(6, 95, 70, 0.4);
+    background: linear-gradient(135deg, #05452f 0%, #065f46 100%);
 }
 
 .assignments-list {
@@ -101,22 +117,35 @@
     padding: 1.5rem;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
     transition: all 0.3s ease;
-    border: 1px solid #E2E8F0;
+    border: 1px solid rgba(5, 150, 105, 0.1);
     display: flex;
     flex-direction: column;
+    position: relative;
+    overflow: hidden;
+}
+
+.assignment-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #065f46 0%, #059669 100%);
 }
 
 .assignment-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-    border-color: #4F46E5;
+    box-shadow: 0 10px 25px rgba(5, 150, 105, 0.1);
+    border-color: rgba(5, 150, 105, 0.3);
 }
 
 .assignment-card h3 {
     margin-top: 0;
     margin-bottom: 1rem;
-    color: #4F46E5;
+    color: #065f46;
     font-size: 1.25rem;
+    font-weight: 600;
 }
 
 .assignment-card p {
@@ -124,19 +153,35 @@
     margin-bottom: 0.5rem;
 }
 
+.assignment-description {
+    line-height: 1.5;
+    margin-bottom: 1rem !important;
+}
+
+.due-date {
+    color: #065f46 !important;
+    font-weight: 500;
+    background: #f0fdf4;
+    padding: 0.5rem;
+    border-radius: 6px;
+    border: 1px solid rgba(5, 150, 105, 0.2);
+}
+
 .assignment-card a {
     padding: 0.5rem 1rem;
     border-radius: 8px;
-    background-color: #E0F2FE;
-    color: #0369A1;
+    background: linear-gradient(135deg, #065f46 0%, #059669 100%);
+    color: white;
     text-decoration: none;
     font-weight: 600;
     transition: all 0.2s ease;
+    box-shadow: 0 1px 3px rgba(6, 95, 70, 0.3);
 }
 
 .assignment-card a:hover {
-    background-color: #BAE6FD;
+    background: linear-gradient(135deg, #05452f 0%, #065f46 100%);
     transform: translateY(-2px);
+    box-shadow: 0 2px 6px rgba(6, 95, 70, 0.4);
 }
 
 .empty-state {
@@ -146,10 +191,12 @@
     background: #F8FAFC;
     border-radius: 16px;
     grid-column: 1 / -1;
+    border: 1px dashed #D1D5DB;
 }
 
 .empty-state p {
     margin-bottom: 1.5rem;
+    font-size: 1.1rem;
 }
 
 /* Адаптивность */
@@ -160,6 +207,10 @@
 
     .assignments-list {
         grid-template-columns: 1fr;
+    }
+
+    .create-assignment {
+        padding: 1.5rem;
     }
 }
 
@@ -178,39 +229,42 @@
     margin-bottom: 1.5rem;
     padding: 0.5rem 1.25rem;
     border-radius: 12px;
-    background: #F1F5F9;
-    color: #4F46E5;
+    background: #f0fdf4;
+    color: #065f46;
     font-weight: 600;
     font-size: 1rem;
-    border: none;
+    border: 1px solid rgba(5, 150, 105, 0.2);
     cursor: pointer;
     transition: all 0.3s ease;
     user-select: none;
     text-align: center;
+    text-decoration: none;
 }
 
 .back-btn:hover {
-    background: #E0E7FF;
+    background: #dcfce7;
     transform: translateY(-2px);
+    box-shadow: 0 2px 6px rgba(5, 150, 105, 0.2);
 }
 
-/* Добавляем новые стили к существующим */
-
+/* Стили для файлов */
 .file-preview {
     position: relative;
     margin: 0.5rem 0;
     padding: 0.8rem;
-    background: #f5f5f5;
+    background: #f8fafc;
     border-radius: 8px;
     display: flex;
     align-items: center;
     gap: 1rem;
+    border: 1px solid rgba(5, 150, 105, 0.1);
 }
 
 .preview-image {
     max-width: 100px;
     max-height: 100px;
     border-radius: 6px;
+    border: 1px solid rgba(5, 150, 105, 0.2);
 }
 
 .preview-file {
@@ -218,6 +272,8 @@
     align-items: center;
     gap: 0.5rem;
     font-size: 1rem;
+    color: #065f46;
+    font-weight: 500;
 }
 
 .remove-file-btn {
@@ -235,6 +291,12 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.remove-file-btn:hover {
+    background: #DC2626;
+    transform: scale(1.1);
 }
 
 .file-attachment {
@@ -247,6 +309,7 @@
     border-radius: 8px;
     cursor: pointer;
     transition: transform 0.2s;
+    border: 1px solid rgba(5, 150, 105, 0.2);
 }
 
 .attachment-image:hover {
@@ -257,9 +320,10 @@
     display: flex;
     align-items: center;
     padding: 0.8rem;
-    background: #f5f5f5;
+    background: #f8fafc;
     border-radius: 8px;
     gap: 1rem;
+    border: 1px solid rgba(5, 150, 105, 0.1);
 }
 
 .file-icon {
@@ -270,28 +334,97 @@
     flex: 1;
     display: flex;
     justify-content: space-between;
+    align-items: center;
 }
 
 .file-name {
     font-weight: 500;
     word-break: break-word;
+    color: #065f46;
 }
 
 .download-btn {
     padding: 0.3rem 0.8rem;
-    background: #4F46E5;
+    background: linear-gradient(135deg, #065f46 0%, #059669 100%);
     color: white;
     border-radius: 4px;
     font-size: 0.9rem;
     text-decoration: none;
     display: inline-block;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 3px rgba(6, 95, 70, 0.3);
 }
 
-/* Адаптивные стили */
+.download-btn:hover {
+    background: linear-gradient(135deg, #05452f 0%, #065f46 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(6, 95, 70, 0.4);
+}
+
+/* Стили для действий преподавателя */
+.assignment-actions {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(5, 150, 105, 0.1);
+}
+
+.delete-btn {
+    padding: 0.5rem 1rem;
+    background: #FEE2E2;
+    color: #DC2626;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 1px 3px rgba(220, 38, 38, 0.2);
+}
+
+.delete-btn:hover {
+    background: #FECACA;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(220, 38, 38, 0.3);
+}
+
+/* Группы форм */
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.form-group label {
+    font-weight: 600;
+    color: #065f46;
+}
+
+/* Сообщения об ошибках */
+.error-message {
+    background: #FEF2F2;
+    color: #DC2626;
+    padding: 1rem;
+    border-radius: 8px;
+    border: 1px solid #FECACA;
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+.error {
+    color: #DC2626;
+    background: #FEF2F2;
+    padding: 0.75rem;
+    border-radius: 6px;
+    border: 1px solid #FECACA;
+    margin-bottom: 1rem;
+}
+
+/* Адаптивные стили для мобильных */
 @media (max-width: 768px) {
     .file-download-card {
         flex-direction: column;
         text-align: center;
+        gap: 0.5rem;
     }
 
     .file-icon {
@@ -301,5 +434,24 @@
     .preview-image {
         max-width: 80px;
         max-height: 80px;
+    }
+
+    .file-info {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .assignments-page {
+        padding: 1rem;
+    }
+
+    .create-assignment {
+        padding: 1.25rem;
+    }
+
+    .assignment-card {
+        padding: 1.25rem;
     }
 }

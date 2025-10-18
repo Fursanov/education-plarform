@@ -10,12 +10,12 @@ function Profile({ user }) {
     const [loading, setLoading] = useState(true);
     const [editing, setEditing] = useState(false);
     const [formData, setFormData] = useState({
-        name: '',
-        bio: '',
-        phone: '',
-        tag: '',
-        avatar: null
-    });
+                                                 name: '',
+                                                 bio: '',
+                                                 phone: '',
+                                                 tag: '',
+                                                 avatar: null
+                                             });
     const [avatarPreview, setAvatarPreview] = useState(null);
     const [error, setError] = useState(null);
     const [success, setSuccess] = useState(null);
@@ -30,12 +30,12 @@ function Profile({ user }) {
                 const data = await getUser(user.uid);
                 setUserData(data);
                 setFormData({
-                    name: data.name || '',
-                    bio: data.bio || '',
-                    phone: data.phone || '',
-                    tag: data.tag || '',
-                    avatar: data.avatar || null
-                });
+                                name: data.name || '',
+                                bio: data.bio || '',
+                                phone: data.phone || '',
+                                tag: data.tag || '',
+                                avatar: data.avatar || null
+                            });
                 if (data.avatar) {
                     setAvatarPreview(data.avatar);
                 }
@@ -84,7 +84,7 @@ function Profile({ user }) {
         const file = e.target.files[0];
         if (!file) return;
 
-        if (file.size > 0.5 * 1024 * 1024) { // 0.5MB limit for base64
+        if (file.size > 0.5 * 1024 * 1024) {
             setError("Файл слишком большой. Максимальный размер: 0.5MB");
             return;
         }
@@ -106,9 +106,7 @@ function Profile({ user }) {
     };
 
     const handleAddFriend = async (userId) => {
-        // Здесь должна быть логика добавления в друзья
         console.log(`Добавление пользователя ${userId} в друзья`);
-        // После добавления обновите список друзей
     };
 
     const generateUniqueTag = () => {
@@ -125,7 +123,6 @@ function Profile({ user }) {
         setSuccess(null);
 
         try {
-            // Сначала обновляем Firestore
             await updateUser(user.uid, {
                 name: formData.name,
                 bio: formData.bio,
@@ -137,11 +134,10 @@ function Profile({ user }) {
             setSuccess("Профиль успешно обновлен!");
             setEditing(false);
 
-            // Обновляем локальные данные
             setUserData({
-                ...userData,
-                ...formData
-            });
+                            ...userData,
+                            ...formData
+                        });
         } catch (err) {
             console.error("Ошибка обновления:", err);
             setError(err.message || "Ошибка при обновлении профиля");
@@ -151,205 +147,207 @@ function Profile({ user }) {
     if (loading) return <div className="loading">Загрузка профиля...</div>;
 
     return (
-        <div className="profile-container">
-            <div className="profile-header">
-                <h1>Мой профиль</h1>
-                {!editing && (
-                    <button
-                        onClick={() => setEditing(true)}
-                        className="btn edit-btn"
-                    >
-                        Редактировать
-                    </button>
-                )}
-            </div>
+        <div className="profile-page">
+            <div className="profile-container">
+                <div className="profile-header">
+                    <h1>Мой профиль</h1>
+                    {!editing && (
+                        <button
+                            onClick={() => setEditing(true)}
+                            className="btn edit-btn"
+                        >
+                            Редактировать
+                        </button>
+                    )}
+                </div>
 
-            {error && <div className="alert error">{error}</div>}
-            {success && <div className="alert success">{success}</div>}
+                {error && <div className="alert error">{error}</div>}
+                {success && <div className="alert success">{success}</div>}
 
-            {editing ? (
-                <form onSubmit={handleSubmit} className="profile-form">
-                    <div className="form-group avatar-group">
-                        <div className="avatar-preview">
-                            {avatarPreview ? (
-                                <img src={avatarPreview} alt="Аватар" />
-                            ) : (
-                                <div className="avatar-placeholder">
-                                    {userData.name?.charAt(0) || 'U'}
-                                </div>
-                            )}
+                {editing ? (
+                    <form onSubmit={handleSubmit} className="profile-form">
+                        <div className="form-group avatar-group">
+                            <div className="avatar-preview">
+                                {avatarPreview ? (
+                                    <img src={avatarPreview} alt="Аватар" />
+                                ) : (
+                                    <div className="avatar-placeholder">
+                                        {userData.name?.charAt(0) || 'U'}
+                                    </div>
+                                )}
+                            </div>
+                            <label className="avatar-upload">
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={handleAvatarChange}
+                                />
+                                Выбрать фото
+                            </label>
+                            <small>Макс. размер: 0.5MB</small>
                         </div>
-                        <label className="avatar-upload">
-                            <input
-                                type="file"
-                                accept="image/*"
-                                onChange={handleAvatarChange}
-                            />
-                            Выбрать фото
-                        </label>
-                        <small>Макс. размер: 0.5MB</small>
-                    </div>
 
-                    <div className="form-group">
-                        <label>Имя</label>
-                        <input
-                            type="text"
-                            name="name"
-                            value={formData.name}
-                            onChange={handleInputChange}
-                            required
-                        />
-                    </div>
-
-                    <div className="form-group">
-                        <label>Уникальный тег</label>
-                        <div className="tag-input">
+                        <div className="form-group">
+                            <label>Имя</label>
                             <input
                                 type="text"
-                                name="tag"
-                                value={formData.tag}
+                                name="name"
+                                value={formData.name}
                                 onChange={handleInputChange}
-                                pattern="[a-zA-Z0-9]{4,12}"
-                                title="Только буквы и цифры (4-12 символов)"
                                 required
                             />
+                        </div>
+
+                        <div className="form-group">
+                            <label>Уникальный тег</label>
+                            <div className="tag-input">
+                                <input
+                                    type="text"
+                                    name="tag"
+                                    value={formData.tag}
+                                    onChange={handleInputChange}
+                                    pattern="[a-zA-Z0-9]{4,12}"
+                                    title="Только буквы и цифры (4-12 символов)"
+                                    required
+                                />
+                                <button
+                                    type="button"
+                                    onClick={generateUniqueTag}
+                                    className="btn generate-tag-btn"
+                                >
+                                    Сгенерировать
+                                </button>
+                            </div>
+                            <small>Используется для идентификации в системе</small>
+                        </div>
+
+                        <div className="form-group">
+                            <label>Телефон</label>
+                            <input
+                                type="tel"
+                                name="phone"
+                                value={formData.phone}
+                                onChange={handleInputChange}
+                                pattern="\+?[0-9\s\-\(\)]{7,}"
+                            />
+                        </div>
+
+                        <div className="form-group">
+                            <label>О себе</label>
+                            <textarea
+                                name="bio"
+                                value={formData.bio}
+                                onChange={handleInputChange}
+                                rows="4"
+                                maxLength="500"
+                            />
+                            <small>{formData.bio.length}/500 символов</small>
+                        </div>
+
+                        <div className="form-actions">
                             <button
                                 type="button"
-                                onClick={generateUniqueTag}
-                                className="btn generate-tag-btn"
+                                onClick={() => {
+                                    setEditing(false);
+                                    setError(null);
+                                    setAvatarPreview(userData.avatar || null);
+                                }}
+                                className="btn cancel-btn"
                             >
-                                Сгенерировать
+                                Отмена
+                            </button>
+                            <button
+                                type="submit"
+                                className="btn save-btn"
+                            >
+                                Сохранить
                             </button>
                         </div>
-                        <small>Используется для идентификации в системе</small>
-                    </div>
+                    </form>
+                ) : (
+                    <div className="profile-content">
+                        <div className="profile-view">
+                            <div className="profile-avatar">
+                                {userData.avatar ? (
+                                    <img src={userData.avatar} alt="Аватар" />
+                                ) : (
+                                    <div className="avatar-placeholder">
+                                        {userData.name?.charAt(0) || 'U'}
+                                    </div>
+                                )}
+                            </div>
 
-                    <div className="form-group">
-                        <label>Телефон</label>
-                        <input
-                            type="tel"
-                            name="phone"
-                            value={formData.phone}
-                            onChange={handleInputChange}
-                            pattern="\+?[0-9\s\-\(\)]{7,}"
-                        />
-                    </div>
+                            <div className="profile-info">
+                                <h2>{userData.name}</h2>
+                                <div className="profile-tag">@{userData.tag || 'notag'}</div>
 
-                    <div className="form-group">
-                        <label>О себе</label>
-                        <textarea
-                            name="bio"
-                            value={formData.bio}
-                            onChange={handleInputChange}
-                            rows="4"
-                            maxLength="500"
-                        />
-                        <small>{formData.bio.length}/500 символов</small>
-                    </div>
+                                <div className="profile-details">
+                                    <div className="detail-item">
+                                        <span className="detail-label">Email:</span>
+                                        <span>{user.email}</span>
+                                    </div>
 
-                    <div className="form-actions">
-                        <button
-                            type="button"
-                            onClick={() => {
-                                setEditing(false);
-                                setError(null);
-                                setAvatarPreview(userData.avatar || null);
-                            }}
-                            className="btn cancel-btn"
-                        >
-                            Отмена
-                        </button>
-                        <button
-                            type="submit"
-                            className="btn save-btn"
-                        >
-                            Сохранить
-                        </button>
-                    </div>
-                </form>
-            ) : (
-                <div className="profile-content">
-                    <div className="profile-view">
-                        <div className="profile-avatar">
-                            {userData.avatar ? (
-                                <img src={userData.avatar} alt="Аватар" />
+                                    {userData.phone && (
+                                        <div className="detail-item">
+                                            <span className="detail-label">Телефон:</span>
+                                            <span>{userData.phone}</span>
+                                        </div>
+                                    )}
+
+                                    {userData.bio && (
+                                        <div className="detail-item">
+                                            <span className="detail-label">О себе:</span>
+                                            <p>{userData.bio}</p>
+                                        </div>
+                                    )}
+
+                                    <div className="detail-item">
+                                        <span className="detail-label">Роль:</span>
+                                        <span className={`role-badge ${userData.role}`}>
+                                            {userData.role === 'student' && 'Студент'}
+                                            {userData.role === 'teacher' && 'Преподаватель'}
+                                            {userData.role === 'admin' && 'Администратор'}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="friends-section">
+                            <h3>Мои друзья ({friends.length})</h3>
+
+                            {friends.length > 0 ? (
+                                <div className="friends-grid">
+                                    {friends.map(friend => (
+                                        <div
+                                            key={friend.id}
+                                            className="friend-card"
+                                            onClick={() => handleFriendClick(friend.id)}
+                                        >
+                                            <div className="friend-avatar">
+                                                {friend.avatar ? (
+                                                    <img src={friend.avatar} alt={friend.name} />
+                                                ) : (
+                                                    <div className="avatar-letter">
+                                                        {friend.name?.charAt(0).toUpperCase()}
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <div className="friend-info">
+                                                <span className="friend-name">{friend.name}</span>
+                                                <span className="friend-tag">@{friend.tag || 'notag'}</span>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
                             ) : (
-                                <div className="avatar-placeholder">
-                                    {userData.name?.charAt(0) || 'U'}
+                                <div className="no-friends">
+                                    <p>У вас пока нет друзей.</p>
                                 </div>
                             )}
                         </div>
-
-                        <div className="profile-info">
-                            <h2>{userData.name}</h2>
-                            <div className="profile-tag">@{userData.tag || 'notag'}</div>
-
-                            <div className="profile-details">
-                                <div className="detail-item">
-                                    <span className="detail-label">Email:</span>
-                                    <span>{user.email}</span>
-                                </div>
-
-                                {userData.phone && (
-                                    <div className="detail-item">
-                                        <span className="detail-label">Телефон:</span>
-                                        <span>{userData.phone}</span>
-                                    </div>
-                                )}
-
-                                {userData.bio && (
-                                    <div className="detail-item">
-                                        <span className="detail-label">О себе:</span>
-                                        <p>{userData.bio}</p>
-                                    </div>
-                                )}
-
-                                <div className="detail-item">
-                                    <span className="detail-label">Роль:</span>
-                                    <span className={`role-badge ${userData.role}`}>
-                                        {userData.role === 'student' && 'Студент'}
-                                        {userData.role === 'teacher' && 'Преподаватель'}
-                                        {userData.role === 'admin' && 'Администратор'}
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
                     </div>
-                    <div className="friends-section">
-                        <h3>Мои друзья ({friends.length})</h3>
-
-                        {friends.length > 0 ? (
-                            <div className="friends-grid">
-                                {friends.map(friend => (
-                                    <div
-                                        key={friend.id}
-                                        className="friend-card"
-                                        onClick={() => handleFriendClick(friend.id)}
-                                    >
-                                        <div className="friend-avatar">
-                                            {friend.avatar ? (
-                                                <img src={friend.avatar} alt={friend.name} />
-                                            ) : (
-                                                <div className="avatar-letter">
-                                                    {friend.name?.charAt(0).toUpperCase()}
-                                                </div>
-                                            )}
-                                        </div>
-                                        <div className="friend-info">
-                                            <span className="friend-name">{friend.name}</span>
-                                            <span className="friend-tag">@{friend.tag || 'notag'}</span>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        ) : (
-                            <div className="no-friends">
-                                <p>У вас пока нет друзей.</p>
-                            </div>
-                        )}
-                    </div>
-                </div>
-            )}
+                )}
+            </div>
         </div>
     );
 }

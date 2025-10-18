@@ -1,0 +1,317 @@
+/* RegistrationQR.css */
+.registration-qr-component {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(5, 150, 105, 0.1);
+    margin-bottom: 2rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.registration-qr-component::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #065f46 0%, #059669 100%);
+}
+
+.registration-qr-component h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #065f46;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.registration-qr-component label {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    font-weight: 500;
+    color: #065f46;
+    flex-wrap: wrap;
+}
+
+.registration-qr-component__select {
+    padding: 0.75rem 1rem;
+    border: 1px solid #D1D5DB;
+    border-radius: 8px;
+    font-size: 1rem;
+    background: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 200px;
+}
+
+.registration-qr-component__select:focus {
+    outline: none;
+    border-color: #059669;
+    box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
+}
+
+.registration-qr-component__button {
+    padding: 0.75rem 1.5rem;
+    background: linear-gradient(135deg, #065f46 0%, #059669 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    box-shadow: 0 2px 8px rgba(6, 95, 70, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.registration-qr-component__button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.2) 50%,
+    transparent 100%);
+    transition: left 0.5s ease;
+}
+
+.registration-qr-component__button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(6, 95, 70, 0.4);
+    background: linear-gradient(135deg, #05452f 0%, #065f46 100%);
+}
+
+.registration-qr-component__button:hover::before {
+    left: 100%;
+}
+
+.registration-qr-component__button:active {
+    transform: translateY(0);
+}
+
+.registration-qr-component__button:disabled {
+    background: #9CA3AF;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.registration-qr-component__button:disabled::before {
+    display: none;
+}
+
+.registration-qr-component__qr-display {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    background: #f0fdf4;
+    border-radius: 8px;
+    border: 1px solid rgba(5, 150, 105, 0.2);
+    text-align: center;
+    animation: qrFadeIn 0.5s ease-out;
+}
+
+.registration-qr-component__qr-display p {
+    margin-top: 1rem;
+    color: #065f46;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.registration-qr-component__qr-display strong {
+    color: #05452f;
+}
+
+@keyframes qrFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.registration-qr-component__link-section {
+    margin-top: 15px;
+    padding: 15px;
+    background-color: #f8fafc;
+    border-radius: 8px;
+    border: 1px solid rgba(5, 150, 105, 0.1);
+}
+
+.registration-qr-component__link-label {
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #065f46;
+}
+
+.registration-qr-component__link-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.registration-qr-component__link {
+    flex: 1;
+    min-width: 200px;
+    color: #059669;
+    text-decoration: none;
+    word-break: break-all;
+    padding: 8px 12px;
+    background-color: white;
+    border: 1px solid rgba(5, 150, 105, 0.2);
+    border-radius: 6px;
+    font-family: 'Monaco', 'Consolas', monospace;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+}
+
+.registration-qr-component__link:hover {
+    color: #065f46;
+    text-decoration: underline;
+    border-color: #059669;
+    box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.1);
+}
+
+.registration-qr-component__copy-btn {
+    padding: 8px 16px;
+    background: linear-gradient(135deg, #065f46 0%, #059669 100%);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+    font-weight: 500;
+    box-shadow: 0 1px 3px rgba(6, 95, 70, 0.3);
+}
+
+.registration-qr-component__copy-btn:hover {
+    background: linear-gradient(135deg, #05452f 0%, #065f46 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(6, 95, 70, 0.4);
+}
+
+.registration-qr-component__copy-btn.copied {
+    background: #059669;
+    transform: scale(0.95);
+    box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.3);
+}
+
+.registration-qr-component__copy-btn:disabled {
+    background: #6c757d;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* Анимация для копирования */
+@keyframes copySuccess {
+    0% { transform: scale(1); }
+    50% { transform: scale(0.95); }
+    100% { transform: scale(1); }
+}
+
+.registration-qr-component__copy-btn.copied {
+    animation: copySuccess 0.3s ease;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .registration-qr-component {
+        padding: 1.5rem;
+    }
+
+    .registration-qr-component h2 {
+        font-size: 1.25rem;
+    }
+
+    .registration-qr-component label {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+
+    .registration-qr-component__select {
+        min-width: 100%;
+    }
+
+    .registration-qr-component__button {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .registration-qr-component__qr-display {
+        padding: 1rem;
+    }
+
+    .registration-qr-component__link-container {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .registration-qr-component__copy-btn {
+        width: 100%;
+    }
+
+    .registration-qr-component__link {
+        min-width: auto;
+        text-align: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .registration-qr-component {
+        padding: 1rem;
+    }
+
+    .registration-qr-component h2 {
+        font-size: 1.1rem;
+    }
+
+    .registration-qr-component__qr-display {
+        padding: 0.875rem;
+    }
+
+    .registration-qr-component__link-section {
+        padding: 0.875rem;
+    }
+}
+
+/* Дополнительные стили для улучшения UX */
+.registration-qr-component__select option {
+    padding: 0.5rem;
+}
+
+.registration-qr-component__button:disabled {
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.7; }
+    100% { opacity: 1; }
+}
+
+/* Стили для QR-кода */
+.registration-qr-component canvas {
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(5, 150, 105, 0.2);
+}

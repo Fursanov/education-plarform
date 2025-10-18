@@ -38,15 +38,18 @@ function CreateCourse({ user }) {
     };
 
     return (
-        <div className="create-course-page">
-            <h1>Создание нового курса</h1>
+        <div className="create-course-container">
+            <h1 className="create-course-title">Создание нового курса</h1>
 
-            <form onSubmit={handleSubmit} className="course-form">
-                <div className="form-group">
-                    <label htmlFor="title">Название курса*</label>
+            <form onSubmit={handleSubmit} className="create-course-form">
+                <div className="create-course-form-group">
+                    <label htmlFor="title" className="create-course-label">
+                        Название курса*
+                    </label>
                     <input
                         id="title"
                         type="text"
+                        className="create-course-input"
                         value={courseTitle}
                         onChange={(e) => {
                             setTitle(e.target.value);
@@ -56,31 +59,32 @@ function CreateCourse({ user }) {
                     />
                 </div>
 
-                <div className="form-group">
-                    <label htmlFor="description">Описание курса</label>
+                <div className="create-course-form-group">
+                    <label htmlFor="description" className="create-course-label">
+                        Описание курса
+                    </label>
                     <textarea
                         id="description"
-                        className="add-course-area"
+                        className="create-course-textarea create-course-textarea-large"
                         value={courseDescription}
                         onChange={(e) => setDescription(e.target.value)}
                         placeholder="Добавьте описание курса"
-                        rows="4"
                     />
                 </div>
 
-                {error && <div className="error-message">{error}</div>}
+                {error && <div className="create-course-error">{error}</div>}
 
-                <div className="form-actions">
+                <div className="create-course-actions">
                     <button
                         type="submit"
-                        className="btn btn-primary"
+                        className="create-course-btn create-course-btn-primary"
                         disabled={isSubmitting}
                     >
                         {isSubmitting ? 'Создание...' : 'Создать курс'}
                     </button>
                     <button
                         type="button"
-                        className="btn btn-secondary"
+                        className="create-course-btn create-course-btn-secondary"
                         onClick={() => navigate('/dashboard')}
                         disabled={isSubmitting}
                     >
