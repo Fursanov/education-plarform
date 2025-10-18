@@ -17,7 +17,7 @@ function AdminPage({ user }) {
     return (
         <div className="admin-page">
             <div className="admin-header">
-                <h1>Панель администратора</h1>
+                <h1>Панель менеджера</h1>
                 <button onClick={handleLogout} className="btn logout-btn">Выйти</button>
             </div>
 

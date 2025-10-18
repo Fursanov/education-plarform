@@ -100,9 +100,9 @@ function AdminAnalytics({ user }) {
                 admin: users.filter(u => u.role === 'admin').length
             };
             setRoleDistribution([
-                                    { name: 'Студенты', value: roles.student, color: '#0369A1' },
+                                    { name: 'Слушатели', value: roles.student, color: '#0369A1' },
                                     { name: 'Преподаватели', value: roles.teacher, color: '#065F46' },
-                                    { name: 'Администраторы', value: roles.admin, color: '#991B1B' }
+                                    { name: 'Менеджеры', value: roles.admin, color: '#991B1B' }
                                 ]);
 
             // Статистика по курсам
@@ -397,9 +397,9 @@ function AdminAnalytics({ user }) {
                     </div>
                 </div>
 
-                {/* Топ курсов по студентам */}
+                {/* Топ курсов по слушателям */}
                 <div className="chart-card">
-                    <h3>Топ курсов по количеству студентов</h3>
+                    <h3>Топ курсов по количеству слушателей</h3>
                     <div className="courses-ranking">
                         {courseStats
                             .sort((a, b) => b.students - a.students)
@@ -410,7 +410,7 @@ function AdminAnalytics({ user }) {
                                     <div className="course-info">
                                         <span className="course-name">{course.name}</span>
                                         <span className="course-meta">
-                                            {course.students} студентов • {course.assignments} заданий
+                                            {course.students} Слушателей • {course.assignments} заданий
                                         </span>
                                     </div>
                                 </div>
@@ -467,7 +467,11 @@ function AdminAnalytics({ user }) {
                                     </div>
                                     <div className="activity-info">
                                         <span className="user-name-activity">{user.name || 'Без имени'}</span>
-                                        <span className="user-role-activity">{user.role}</span>
+                                        <span className={`role-badge ${user.role}`}>
+                                            {user.role === 'student' && 'Слушатель'}
+                                            {user.role === 'teacher' && 'Преподаватель'}
+                                            {user.role === 'admin' && 'Менеджер'}
+                                        </span>
                                         <span className="last-login-activity">
                                             {formatLastLogin(user.lastLogin)}
                                         </span>

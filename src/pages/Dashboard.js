@@ -113,9 +113,9 @@ function Dashboard({ user }) {
                 <h1 className="dashboard__title">
                     Добро пожаловать, {userData?.name}
                     <span className={`dashboard__role-tag dashboard__role-tag--${userData?.role}`}>
-                        {userData?.role === 'student' && 'Обучающийся'}
+                        {userData?.role === 'student' && 'Слушатель'}
                         {userData?.role === 'teacher' && 'Преподаватель'}
-                        {userData?.role === 'admin' && 'Администратор'}
+                        {userData?.role === 'admin' && 'Менеджер'}
                     </span>
                 </h1>
                 <button onClick={handleLogout} className="dashboard__btn dashboard__logout-btn">
@@ -174,7 +174,7 @@ function Dashboard({ user }) {
                                         <p>{course.courseDescription || 'Описание отсутствует'}</p>
                                         <div className="dashboard__course-actions">
                                             <Link to={`/assignments/${course.id}`}>Задания</Link>
-                                            <Link to={`/students/${course.id}`}>Студенты</Link>
+                                            <Link to={`/students/${course.id}`}>Слушатели</Link>
                                             <Link to={`/chat/${course.id}`}>Чат</Link>
                                         </div>
                                     </div>

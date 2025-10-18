@@ -3,7 +3,7 @@ import './AssignmentCard.css';
 function AssignmentCard({ assignment, isTeacher }) {
     return (
         <div className="assignment-card">
-            <h3>{assignment.courseTitle}</h3>
+            <h3>{assignment?.courseTitle}</h3>
             <p className="description">{assignment.courseDescription}</p>
             <p className="due-date">
                 Срок сдачи: {assignment.dueDate?.toDate().toLocaleString()}

@@ -1,9 +1,19 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
-import { getChatMessages, sendChatMessage, getUser, markMessagesAsRead, getUserChats, getChatParticipants } from '../services/firestore';
+import {
+    getChatMessages,
+    sendChatMessage,
+    getUser,
+    markMessagesAsRead,
+    getUserChats,
+    getChatParticipants,
+    editChatMessage,
+    deleteChatMessage
+} from '../services/firestore';
 import './Chat.css';
 import { format, isToday, isYesterday } from 'date-fns';
 import { ru } from 'date-fns/locale';
+import FullscreenImage from "./FullscreenImage";
 
 function Chat({ user }) {
     const { courseId } = useParams();
@@ -28,6 +38,17 @@ function Chat({ user }) {
     const messagesContainerRef = useRef(null);
     const unreadSeparatorRef = useRef(null);
     const participantsRef = useRef(null);
+    const [editingMessageId, setEditingMessageId] = useState(null);
+
+    const handleDeleteMessage = async (messageId) => {
+        if (!window.confirm('Вы уверены, что хотите удалить это сообщение?')) return;
+        try {
+            await deleteChatMessage(courseId, messageId);
+        } catch (err) {
+            console.error("Ошибка удаления сообщения:", err);
+            alert('Ошибка при удалении сообщения');
+        }
+    };
 
     const navigateToProfile = (userId) => {
         if (userId !== user.uid) {
@@ -35,45 +56,28 @@ function Chat({ user }) {
         }
     };
 
-    // Получаем список участников чата
+    const handleEditClick = (msg) => {
+        setEditingMessageId(msg.id);
+        setNewMessage(msg.text || '');
+    };
+
     useEffect(() => {
         const fetchParticipants = async () => {
             const participantsList = await getChatParticipants(courseId);
             setParticipants(participantsList);
         };
-
         fetchParticipants();
     }, [courseId]);
 
-    // Закрываем список участников при клике вне его
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (participantsRef.current && !participantsRef.current.contains(event.target)) {
                 setShowParticipants(false);
             }
         };
-
         document.addEventListener('mousedown', handleClickOutside);
-        return () => {
-            document.removeEventListener('mousedown', handleClickOutside);
-        };
+        return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
-
-    // Получаем список чатов пользователя
-    useEffect(() => {
-        const fetchUserChats = async () => {
-            if (user?.uid) {
-                const chats = await getUserChats(user.uid, userData?.role === "teacher");
-                setUserChats(chats);
-
-                // Находим информацию о текущем чате
-                const currentChat = chats.find(chat => chat.id === courseId);
-                setCurrentChatInfo(currentChat);
-            }
-        };
-
-        fetchUserChats();
-    }, [userData, user, courseId]);
 
     useEffect(() => {
         const fetchUserData = async () => {
@@ -148,9 +152,7 @@ function Chat({ user }) {
     const removeFile = () => {
         setFile(null);
         setPreview(null);
-        if (fileInputRef.current) {
-            fileInputRef.current.value = '';
-        }
+        if (fileInputRef.current) fileInputRef.current.value = '';
     };
 
     const readFileAsBase64 = (file) => {
@@ -176,42 +178,41 @@ function Chat({ user }) {
                 fileData = await readFileAsBase64(file);
             }
 
-            await sendChatMessage(courseId, {
-                text: newMessage,
-                senderId: user.uid,
-                senderName: userData?.name || 'Аноним',
-                timestamp: new Date(),
-                ...(fileData && {
-                    fileData,
-                    fileType,
-                    fileName: file.name,
-                    fileSize: file.size
-                })
-            });
+            if (editingMessageId) {
+                await editChatMessage(courseId, editingMessageId, newMessage);
+                setEditingMessageId(null);
+            } else {
+                await sendChatMessage(courseId, {
+                    text: newMessage,
+                    senderId: user.uid,
+                    senderName: userData?.name || 'Аноним',
+                    timestamp: new Date(),
+                    ...(fileData && {
+                        fileData,
+                        fileType,
+                        fileName: file.name,
+                        fileSize: file.size
+                    })
+                });
+            }
 
             setNewMessage('');
             setFile(null);
             setPreview(null);
-            if (fileInputRef.current) {
-                fileInputRef.current.value = '';
-            }
+            if (fileInputRef.current) fileInputRef.current.value = '';
 
-            // Плавный скролл вниз после отправки
             setTimeout(() => {
                 messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
             }, 100);
         } catch (err) {
-            console.error("Error sending message:", err);
+            console.error("Ошибка отправки сообщения:", err);
             alert('Ошибка при отправке сообщения');
         } finally {
             setIsSending(false);
         }
     };
 
-    const formatTime = (date) => {
-        return format(date, 'HH:mm', { locale: ru });
-    };
-
+    const formatTime = (date) => format(date, 'HH:mm', { locale: ru });
     const formatDateSeparator = (date) => {
         if (isToday(date)) return 'Сегодня';
         if (isYesterday(date)) return 'Вчера';
@@ -235,41 +236,23 @@ function Chat({ user }) {
     messages.forEach((msg) => {
         const msgDate = msg.timestamp?.toDate ? msg.timestamp.toDate() : new Date();
         const dateStr = formatDateSeparator(msgDate);
-
         const isUnread = lastReadTime && msgDate > new Date(lastReadTime) && msg.senderId !== user.uid;
 
         if (isUnread && !hasUnreadMessages) {
             hasUnreadMessages = true;
-            groupedMessages.push({
-                                     type: 'unread',
-                                     id: `unread-${msg.id}`,
-                                     timestamp: msgDate
-                                 });
+            groupedMessages.push({ type: 'unread', id: `unread-${msg.id}`, timestamp: msgDate });
         }
 
         if (dateStr !== lastDate) {
-            groupedMessages.push({
-                                     type: 'date',
-                                     id: `date-${dateStr}`,
-                                     dateStr
-                                 });
+            groupedMessages.push({ type: 'date', id: `date-${dateStr}`, dateStr });
             lastDate = dateStr;
         }
 
-        groupedMessages.push({
-                                 type: 'message',
-                                 ...msg,
-                                 isUnread
-                             });
+        groupedMessages.push({ type: 'message', ...msg, isUnread });
     });
 
-    const toggleSidebar = () => {
-        setSidebarOpen(!sidebarOpen);
-    };
-
-    const toggleParticipants = () => {
-        setShowParticipants(!showParticipants);
-    };
+    const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
+    const toggleParticipants = () => setShowParticipants(!showParticipants);
 
     return (
         <div>
@@ -277,7 +260,6 @@ function Chat({ user }) {
                 <div className="chat__sidebar-header">
                     <h2 className="chat__sidebar-title">Чаты курсов</h2>
                 </div>
-
                 <div className="chat__current-info">
                     {currentChatInfo && (
                         <>
@@ -286,7 +268,6 @@ function Chat({ user }) {
                         </>
                     )}
                 </div>
-
                 <div className="chat__list">
                     {userChats.map(chat => (
                         <Link
@@ -300,16 +281,12 @@ function Chat({ user }) {
                     ))}
                 </div>
             </div>
+
             <div className={`chat ${sidebarOpen ? 'chat--sidebar-open' : ''}`}>
-                {/* Кнопка для открытия/закрытия боковой панели */}
-                <button
-                    className="chat__button chat__button--toggle"
-                    onClick={toggleSidebar}
-                >
+                <button className="chat__button chat__button--toggle" onClick={toggleSidebar}>
                     {sidebarOpen ? '✕' : '☰'}
                 </button>
 
-                {/* Основное содержимое чата */}
                 <div className="chat__main">
                     <div className="chat__header">
                         {courseId !== 'general' ? (
@@ -326,62 +303,41 @@ function Chat({ user }) {
                         </button>
                     </div>
 
-                    {/* Список участников чата */}
                     {showParticipants && (
                         <div className="chat__participants" ref={participantsRef}>
                             <h3 className="chat__participants-title">Участники чата ({participants.length})</h3>
-                            <div>
-                                {participants.map((participant) => (
-                                    <div
-                                        key={participant.id}
-                                        className="chat__participant"
-                                        onClick={() => navigateToProfile(participant.id)}
-                                    >
-                                        <div className="chat__participant-avatar">
-                                            {participant.avatar ? (
-                                                <img
-                                                    src={participant.avatar}
-                                                    alt={`Аватар ${participant.name}`}
-                                                    className="chat__participant-avatar-img"
-                                                />
-                                            ) : (
-                                                <div className="chat__participant-avatar-letter">
-                                                    {participant.name.charAt(0).toUpperCase()}
-                                                </div>
-                                            )}
+                            {participants.map(p => (
+                                <div
+                                    key={p.id}
+                                    className="chat__participant"
+                                    onClick={() => navigateToProfile(p.id)}
+                                >
+                                    <div className="chat__participant-avatar">
+                                        {p.avatar ? (
+                                            <img src={p.avatar} alt={p.name} className="chat__participant-avatar-img" />
+                                        ) : (
+                                            <div className="chat__participant-avatar-letter">
+                                                {p.name.charAt(0).toUpperCase()}
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div className="chat__participant-info">
+                                        <div className="chat__participant-name">
+                                            {p.name}{p.id === user.uid && ' (Вы)'}
                                         </div>
-                                        <div className="chat__participant-info">
-                                            <div className="chat__participant-name">
-                                                {participant.name}
-                                                {participant.id === user.uid && ' (Вы)'}
-                                            </div>
-                                            <div className="chat__participant-role">
-                                                {participant.role === 'teacher' ? 'Преподаватель' : 'Студент'}
-                                            </div>
+                                        <div className="chat__participant-role">
+                                            {p.role === 'teacher' ? 'Преподаватель' : 'Слушатели'}
                                         </div>
                                     </div>
-                                ))}
-                            </div>
+                                </div>
+                            ))}
                         </div>
                     )}
 
                     {fullscreenImage && (
-                        <div
-                            className="chat__modal-overlay"
-                            onClick={() => setFullscreenImage(null)}
-                        >
-                            <img
-                                src={fullscreenImage}
-                                alt="Полноэкранное изображение"
-                                className="chat__modal-image"
-                                onClick={(e) => e.stopPropagation()}
-                            />
-                            <button
-                                className="chat__modal-close"
-                                onClick={() => setFullscreenImage(null)}
-                            >
-                                ×
-                            </button>
+                        <div className="chat__modal-overlay" onClick={() => setFullscreenImage(null)}>
+                            <FullscreenImage src={fullscreenImage} />
+                            <button className="chat__modal-close" onClick={() => setFullscreenImage(null)}>×</button>
                         </div>
                     )}
 
@@ -397,111 +353,81 @@ function Chat({ user }) {
                                 {preview !== 'file' ? (
                                     <img src={preview} alt="Превью" className="chat__preview-image" />
                                 ) : (
-                                    <div className="chat__preview-file">
-                                        {getFileIcon(file.name)} {file.name}
-                                    </div>
+                                    <div className="chat__preview-file">{getFileIcon(file.name)} {file.name}</div>
                                 )}
-                                <button
-                                    type="button"
-                                    onClick={removeFile}
-                                    className="chat__remove-button"
-                                >
-                                    ×
-                                </button>
+                                <button type="button" onClick={removeFile} className="chat__remove-button">×</button>
                             </div>
                         )}
 
-                        {!preview && groupedMessages.map((item) => {
-                            if (item.type === 'date') {
-                                return (
-                                    <div key={item.id} className="chat__date-separator">
-                                        {item.dateStr}
-                                    </div>
-                                );
-                            } else if (item.type === 'unread') {
-                                return (
-                                    <div
-                                        key={item.id}
-                                        className="chat__unread-separator"
-                                        ref={hasUnreadMessages ? unreadSeparatorRef : null}
-                                    >
-                                        <div className="chat__unread-line"></div>
-                                        <div className="chat__unread-label">Новые сообщения</div>
-                                        <div className="chat__unread-line"></div>
-                                    </div>
-                                );
-                            } else {
-                                const isOwn = item.senderId === user.uid;
-                                const msgDate = item.timestamp?.toDate ? item.timestamp.toDate() : new Date();
-                                return (
-                                    <div
-                                        key={item.id}
-                                        className={`chat__message ${
-                                            isOwn ? 'chat__message--sent' : 'chat__message--received'
-                                        } ${item.isUnread ? 'chat__message--unread' : ''}`}
-                                    >
-                                        <div className="chat__message-content">
-                                            <div className="chat__message-sender">
-                                                {isOwn ? 'Вы' : item.senderName}
-                                            </div>
-                                            {item.fileData && (
-                                                <div className="chat__attachment">
-                                                    {item.fileType === 'image' ? (
-                                                        <img
-                                                            src={item.fileData}
-                                                            alt="Прикрепленное изображение"
-                                                            className="chat__attachment-image"
-                                                            onClick={() => setFullscreenImage(item.fileData)}
-                                                        />
-                                                    ) : (
-                                                        <div className="chat__file-card">
-                                                            <div className="chat__file-icon">{getFileIcon(item.fileName)}</div>
-                                                            <div className="chat__file-details">
-                                                                <div className="chat__file-name">{item.fileName}</div>
-                                                                <div className="chat__file-size">{(item.fileSize / 1024).toFixed(1)} KB</div>
-                                                                <a
-                                                                    href={item.fileData}
-                                                                    download={item.fileName}
-                                                                    className="chat__download-link"
-                                                                >
-                                                                    Скачать
-                                                                </a>
-                                                            </div>
+                        {!preview && groupedMessages.map(item => {
+                            if (item.type === 'date') return <div key={item.id} className="chat__date-separator">{item.dateStr}</div>;
+                            if (item.type === 'unread') return (
+                                <div key={item.id} className="chat__unread-separator" ref={hasUnreadMessages ? unreadSeparatorRef : null}>
+                                    <div className="chat__unread-line"></div>
+                                    <div className="chat__unread-label">Новые сообщения</div>
+                                    <div className="chat__unread-line"></div>
+                                </div>
+                            );
+
+                            const isOwn = item.senderId === user.uid;
+                            const msgDate = item.timestamp?.toDate ? item.timestamp.toDate() : new Date();
+
+                            return (
+                                <div
+                                    key={item.id}
+                                    className={`chat__message ${isOwn ? 'chat__message--sent' : 'chat__message--received'} ${item.isUnread ? 'chat__message--unread' : ''}`}
+                                >
+                                    <div className="chat__message-content">
+                                        <div className="chat__message-sender">{isOwn ? 'Вы' : item.senderName}</div>
+                                        {item.fileData && (
+                                            <div className="chat__attachment">
+                                                {item.fileType === 'image' ? (
+                                                    <img src={item.fileData} alt="Прикрепленное изображение" className="chat__attachment-image" onClick={() => setFullscreenImage(item.fileData)} />
+                                                ) : (
+                                                    <div className="chat__file-card">
+                                                        <div className="chat__file-icon">{getFileIcon(item.fileName)}</div>
+                                                        <div className="chat__file-details">
+                                                            <div className="chat__file-name">{item.fileName}</div>
+                                                            <div className="chat__file-size">{(item.fileSize / 1024).toFixed(1)} KB</div>
+                                                            <a href={item.fileData} download={item.fileName} className="chat__download-link">Скачать</a>
                                                         </div>
-                                                    )}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+                                        {item.text && <div className="chat__message-text">{item.text}{item.editedAt && <span className="chat__message-edited"> (отредактировано)</span>}</div>}
+
+                                        <div className="chat__message-footer">
+                                            {(isOwn || userData.role === 'admin') && (
+                                                <div className="chat__message-actions">
+                                                    <button onClick={() => handleEditClick(item)} title="Редактировать">✎</button>
+                                                    <button onClick={() => handleDeleteMessage(item.id)} title="Удалить">🗑️</button>
                                                 </div>
                                             )}
-
-                                            {item.text && <div className="chat__message-text">{item.text}</div>}
-
-                                            <div className="chat__message-time">
-                                                {formatTime(msgDate)}
-                                            </div>
+                                            <div className="chat__message-time">{formatTime(msgDate)}</div>
                                         </div>
+
                                     </div>
-                                );
-                            }
+                                </div>
+                            );
                         })}
                         <div ref={messagesEndRef} />
                     </div>
 
                     <form onSubmit={handleSendMessage} className="chat__form">
-                        <Link
-                            to={`/video-call/${courseId}`}
-                            className="chat__button chat__button--call"
-                            title="Видеозвонок"
-                        >
-                            📞
-                        </Link>
+                        <Link to={`/video-call/${courseId}`} className="chat__button chat__button--call" title="Видеозвонок">📞</Link>
                         <div className="chat__input-group">
                             <input
                                 type="text"
                                 value={newMessage}
-                                onChange={(e) => setNewMessage(e.target.value)}
+                                onChange={e => setNewMessage(e.target.value)}
                                 placeholder="Введите сообщение..."
                                 disabled={isSending}
                                 className="chat__input"
                             />
+                            {editingMessageId && (
+                                <button type="button" onClick={() => { setEditingMessageId(null); setNewMessage(''); }} className="chat__button chat__button--cancel" title="Отменить редактирование">✕</button>
+                            )}
                             <label className="chat__button chat__button--file" title="Прикрепить файл">
                                 <input
                                     type="file"
@@ -514,13 +440,8 @@ function Chat({ user }) {
                                 📎
                             </label>
                         </div>
-                        <button
-                            type="submit"
-                            disabled={(!newMessage.trim() && !file) || isSending}
-                            className="chat__button chat__button--send"
-                            title="Отправить сообщение"
-                        >
-                            {isSending ? '...' : '➤'}
+                        <button type="submit" disabled={(!newMessage.trim() && !file) || isSending} className="chat__button chat__button--send" title={editingMessageId ? "Сохранить изменения" : "Отправить сообщение"}>
+                            {isSending ? '...' : editingMessageId ? '💾' : '➤'}
                         </button>
                     </form>
                 </div>

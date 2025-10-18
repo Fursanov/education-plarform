@@ -5,7 +5,7 @@ import './Students.css';
 import { useParams, useNavigate } from 'react-router-dom';
 import LoadingSpinner from "../components/UI/LoadingSpinner";
 
-function Students({ user }) {
+function Students({ user, userData }) {
     const [courses, setCourses] = useState([]);
     const [selectedCourse, setSelectedCourse] = useState(null);
     const [courseStudents, setCourseStudents] = useState([]);
@@ -20,12 +20,23 @@ function Students({ user }) {
     useEffect(() => {
         const fetchCourses = async () => {
             setIsLoading(true);
-            const q = query(collection(db, "courses"), where("teacherId", "==", user.uid));
-            const querySnapshot = await getDocs(q);
-            const coursesList = [];
-            querySnapshot.forEach((doc) => {
-                coursesList.push({ id: doc.id, ...doc.data() });
-            });
+            let coursesList = [];
+
+            if (userData.role === 'admin') {
+                // Админ видит все курсы
+                const querySnapshot = await getDocs(collection(db, "courses"));
+                querySnapshot.forEach((doc) => {
+                    coursesList.push({ id: doc.id, ...doc.data() });
+                });
+            } else {
+                // Преподаватель видит только свои курсы
+                const q = query(collection(db, "courses"), where("teacherId", "==", user.uid));
+                const querySnapshot = await getDocs(q);
+                querySnapshot.forEach((doc) => {
+                    coursesList.push({ id: doc.id, ...doc.data() });
+                });
+            }
+
             setCourses(coursesList);
 
             if (courseId) {
@@ -34,8 +45,10 @@ function Students({ user }) {
             } else if (coursesList.length > 0) {
                 setSelectedCourse(coursesList[0]);
             }
+
             setIsLoading(false);
         };
+
         fetchCourses();
     }, [user, courseId]);
 
@@ -88,7 +101,7 @@ function Students({ user }) {
         }
 
         if (selectedCourse.students?.includes(studentId)) {
-            alert('Студент уже в курсе');
+            alert('Слушатель уже в курсе');
             return;
         }
 
@@ -106,7 +119,7 @@ function Students({ user }) {
 
         } catch (error) {
             console.error(error);
-            alert('Ошибка при добавлении студента');
+            alert('Ошибка при добавлении слушателей');
         } finally {
             setIsLoading(false);
         }
@@ -122,10 +135,10 @@ function Students({ user }) {
             await updateDoc(courseRef, { students: updatedStudents });
             setSelectedCourse(prev => ({ ...prev, students: updatedStudents }));
             setCourseStudents(prev => prev.filter(s => s.id !== studentId));
-            alert('Студент удалён из курса');
+            alert('Слушатели удалён из курса');
         } catch (error) {
             console.error(error);
-            alert('Ошибка при удалении студента');
+            alert('Ошибка при удалении слушателя');
         } finally {
             setIsLoading(false);
         }
@@ -161,7 +174,7 @@ function Students({ user }) {
                 ← Вернуться
             </button>
 
-            <h1 className="students-management__title">Управление студентами</h1>
+            <h1 className="students-management__title">Управление слушателями</h1>
 
             <div className="students-management__course-selection">
                 <h2>Выберите курс</h2>
@@ -182,14 +195,14 @@ function Students({ user }) {
 
             {selectedCourse && (
                 <div className="students-management__container">
-                    {/* Студенты курса */}
+                    {/* Слушатели курса */}
                     <div className="students-management__list-block">
                         <h2 className="students-management__list-title">
-                            Студенты курса: {selectedCourse.courseTitle}
+                            Слушатели курса: {selectedCourse.courseTitle}
                         </h2>
                         <input
                             type="text"
-                            placeholder="Поиск студентов курса..."
+                            placeholder="Поиск Слушателей курса..."
                             value={searchTermCourse}
                             onChange={e => setSearchTermCourse(e.target.value)}
                             className="students-management__search"
@@ -219,17 +232,17 @@ function Students({ user }) {
                             ))
                         ) : (
                             <div className="students-management__empty-state">
-                                <p>Студенты не найдены</p>
+                                <p>Слушатели не найдены</p>
                             </div>
                         )}
                     </div>
 
-                    {/* Все студенты */}
+                    {/* Все слушатели */}
                     <div className="students-management__list-block">
-                        <h2 className="students-management__list-title">Все студенты</h2>
+                        <h2 className="students-management__list-title">Все слушатели</h2>
                         <input
                             type="text"
-                            placeholder="Поиск по всем студентам..."
+                            placeholder="Поиск по всем слушателям..."
                             value={searchTermAll}
                             onChange={e => setSearchTermAll(e.target.value)}
                             className="students-management__search"
@@ -254,7 +267,7 @@ function Students({ user }) {
                             ))
                         ) : (
                             <div className="students-management__empty-state">
-                                <p>Нет доступных студентов для добавления</p>
+                                <p>Нет доступных слушателей для добавления</p>
                             </div>
                         )}
                     </div>

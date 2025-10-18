@@ -61,9 +61,9 @@ function RegistrationQR({ user }) {
 
     const getRoleDisplayName = (role) => {
         const roles = {
-            student: 'Обучающийся',
+            student: 'Слушатель',
             teacher: 'Преподаватель',
-            admin: 'Администратор'
+            admin: 'Менеджер'
         };
         return roles[role] || role;
     };
@@ -79,9 +79,9 @@ function RegistrationQR({ user }) {
                     value={newRole}
                     onChange={(e) => setNewRole(e.target.value)}
                 >
-                    <option value="student">Обучающийся</option>
+                    <option value="student">Слушатель</option>
                     <option value="teacher">Преподаватель</option>
-                    <option value="admin">Администратор</option>
+                    <option value="admin">Менеджер</option>
                 </select>
             </label>
 

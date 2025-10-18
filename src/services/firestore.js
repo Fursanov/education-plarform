@@ -15,7 +15,7 @@ import {
     limit,
     startAt,
     endAt,
-    Timestamp
+    Timestamp, deleteDoc
 } from "firebase/firestore";
 
 // Обновленная функция добавления пользователя
@@ -242,19 +242,28 @@ export const getChatParticipants = async (courseId) => {
 export const getUserChats = async (userId, isTeacher, isAdmin = false) => {
     try {
         const coursesRef = collection(db, 'courses');
-        const studentQuery = query(coursesRef, where('students', 'array-contains', userId));
-        const studentCoursesSnapshot = await getDocs(studentQuery);
+        let allDocs = [];
 
-        let allDocs = [...studentCoursesSnapshot.docs];
+        if (isAdmin) {
+            // Для админа — все курсы
+            const allCoursesSnapshot = await getDocs(coursesRef);
+            allDocs = allCoursesSnapshot.docs;
+        } else {
+            // Для студента
+            const studentQuery = query(coursesRef, where('students', 'array-contains', userId));
+            const studentCoursesSnapshot = await getDocs(studentQuery);
+            allDocs = [...studentCoursesSnapshot.docs];
 
-        if (isTeacher) {
-            const teacherQuery = query(coursesRef, where('teacherId', '==', userId));
-            const teacherCoursesSnapshot = await getDocs(teacherQuery);
+            // Для преподавателя
+            if (isTeacher) {
+                const teacherQuery = query(coursesRef, where('teacherId', '==', userId));
+                const teacherCoursesSnapshot = await getDocs(teacherQuery);
 
-            const courseMap = new Map();
-            allDocs.forEach(doc => courseMap.set(doc.id, doc));
-            teacherCoursesSnapshot.docs.forEach(doc => courseMap.set(doc.id, doc));
-            allDocs = Array.from(courseMap.values());
+                const courseMap = new Map();
+                allDocs.forEach(doc => courseMap.set(doc.id, doc));
+                teacherCoursesSnapshot.docs.forEach(doc => courseMap.set(doc.id, doc));
+                allDocs = Array.from(courseMap.values());
+            }
         }
 
         const chats = await Promise.all(
@@ -315,4 +324,14 @@ export const getUserChats = async (userId, isTeacher, isAdmin = false) => {
         console.error("Error in getUserChats:", error);
         return [];
     }
+};
+
+export const editChatMessage = async (courseId, messageId, newText) => {
+    const messageRef = doc(db, 'courses', courseId, 'messages', messageId);
+    await updateDoc(messageRef, { text: newText, editedAt: new Date() });
+};
+
+export const deleteChatMessage = async (courseId, messageId) => {
+    const messageRef = doc(db, 'courses', courseId, 'messages', messageId);
+    await deleteDoc(messageRef);
 };

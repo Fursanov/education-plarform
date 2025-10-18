@@ -14,7 +14,7 @@ import { db } from '../services/firebase';
 import './Assignments.css';
 import LoadingSpinner from '../components/UI/LoadingSpinner';
 
-function Assignments({ user }) {
+function Assignments({ user, userData }) {
     const { courseId } = useParams();
     const [course, setCourse] = useState(null);
     const [assignments, setAssignments] = useState([]);
@@ -40,7 +40,7 @@ function Assignments({ user }) {
                 }
 
                 setCourse(courseDoc.data());
-                setIsTeacher(courseDoc.data().teacherId === user.uid);
+                setIsTeacher(courseDoc.data().teacherId === user.uid || userData.role === 'admin');
 
                 // Получаем задания курса
                 const assignmentsQuery = query(

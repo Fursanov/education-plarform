@@ -304,9 +304,9 @@ function Profile({ user }) {
                                     <div className="detail-item">
                                         <span className="detail-label">Роль:</span>
                                         <span className={`role-badge ${userData.role}`}>
-                                            {userData.role === 'student' && 'Студент'}
+                                            {userData.role === 'student' && 'Слушатель'}
                                             {userData.role === 'teacher' && 'Преподаватель'}
-                                            {userData.role === 'admin' && 'Администратор'}
+                                            {userData.role === 'admin' && 'Менеджер'}
                                         </span>
                                     </div>
                                 </div>

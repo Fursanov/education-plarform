@@ -22,7 +22,7 @@ function Navbar({ user, toggleSidebar }) {
                         <Link to="/" className="navbar-link">Мои курсы</Link>
                     )}
                     {user?.role === 'admin' && (
-                        <Link to="/admin" className="navbar-link">Админ-панель</Link>
+                        <Link to="/admin" className="navbar-link">Менеджер-панель</Link>
                     )}
                     <Link to="/profile" className="navbar-link">
                         <div className="user-info">

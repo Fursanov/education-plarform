@@ -157,7 +157,7 @@ function AdminImportDataButton({ user }) {
     return (
         <div className="admin-import-wrapper">
             <div className="admin-import-header">
-                <h3>Импорт курсов (Администратор)</h3>
+                <h3>Импорт курсов (Менеджер)</h3>
                 <button
                     onClick={downloadTemplate}
                     className="download-template-btn"

@@ -83,7 +83,7 @@ function AdminUsers({ user }) {
                         <span className="admin-users-page__stat-number">{stats.total}</span>
                     </div>
                     <div className="admin-users-page__stat-card">
-                        <h3>Студентов</h3>
+                        <h3>Слушателей</h3>
                         <span className="admin-users-page__stat-number admin-users-page__stat-number--student">
                             {stats.students}
                         </span>
@@ -95,7 +95,7 @@ function AdminUsers({ user }) {
                         </span>
                     </div>
                     <div className="admin-users-page__stat-card">
-                        <h3>Администраторов</h3>
+                        <h3>Менеджеров</h3>
                         <span className="admin-users-page__stat-number admin-users-page__stat-number--admin">
                             {stats.admins}
                         </span>
@@ -118,9 +118,9 @@ function AdminUsers({ user }) {
                         className="admin-users-page__filter-select"
                     >
                         <option value="all">Все роли</option>
-                        <option value="student">Студенты</option>
+                        <option value="student">Слушатели</option>
                         <option value="teacher">Преподаватели</option>
-                        <option value="admin">Администраторы</option>
+                        <option value="admin">Менеджеры</option>
                     </select>
                     <button
                         className="admin-users-page__qr-toggle-button"
@@ -173,9 +173,9 @@ function AdminUsers({ user }) {
                                 <td>{userItem.email}</td>
                                 <td>
                                         <span className={`admin-users-page__role-badge admin-users-page__role-badge--${userItem.role}`}>
-                                            {userItem.role === 'student' && 'Студент'}
+                                            {userItem.role === 'student' && 'Слушатель'}
                                             {userItem.role === 'teacher' && 'Преподаватель'}
-                                            {userItem.role === 'admin' && 'Администратор'}
+                                            {userItem.role === 'admin' && 'Менеджер'}
                                         </span>
                                 </td>
                                 <td>
@@ -191,9 +191,9 @@ function AdminUsers({ user }) {
                                             onChange={(e) => handleRoleChange(userItem.id, e.target.value)}
                                             className="admin-users-page__role-select"
                                         >
-                                            <option value="student">Студент</option>
+                                            <option value="student">Слушатель</option>
                                             <option value="teacher">Преподаватель</option>
-                                            <option value="admin">Администратор</option>
+                                            <option value="admin">Менеджер</option>
                                         </select>
                                     ) : (
                                         <span className="admin-users-page__current-user-text">текущий пользователь</span>

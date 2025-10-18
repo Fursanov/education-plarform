@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { getUser, addFriend, checkIfFriend } from '../services/firestore';
 import {Link, useParams} from 'react-router-dom';
 import './Profile.css';
+import './UserProfile.css';
 import LoadingSpinner from "../components/UI/LoadingSpinner";
 
 function UserProfile({ currentUser }) {
@@ -117,9 +118,9 @@ function UserProfile({ currentUser }) {
                         <div className="detail-item">
                             <span className="detail-label">Роль:</span>
                             <span className={`role-badge ${userData.role}`}>
-                                {userData.role === 'student' && 'Студент'}
+                                {userData.role === 'student' && 'Слушатель'}
                                 {userData.role === 'teacher' && 'Преподаватель'}
-                                {userData.role === 'admin' && 'Администратор'}
+                                {userData.role === 'admin' && 'Менеджер'}
                             </span>
                         </div>
 
