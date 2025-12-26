@@ -5,6 +5,8 @@ import './PrivateChat.css';
 import { format, isToday, isYesterday } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import LoadingSpinner from "../components/UI/LoadingSpinner";
+import { collection, onSnapshot, orderBy, query, where } from 'firebase/firestore';
+import { db } from '../services/firebase';
 
 function PrivateChat({ currentUser }) {
     const { userId } = useParams();
@@ -22,27 +24,47 @@ function PrivateChat({ currentUser }) {
     const fileInputRef = useRef(null);
 
     useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const recipient = await getUser(userId);
-                setRecipientData(recipient);
+        setLoading(true);
+        setError(null);
 
-                const chatMessages = await getPrivateMessages(currentUser.uid, userId);
-                setMessages(chatMessages);
+        const chatId = [currentUser.uid, userId].sort().join('_');
+        const messagesRef = collection(db, 'privateChats', chatId, 'messages');
+        const q = query(messagesRef, orderBy('timestamp'));
 
+        let initialLoad = true; // локальный флаг для этого эффекта
+
+        const unsubscribe = onSnapshot(q, (snapshot) => {
+            const chatMessages = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            setMessages(chatMessages);
+            setLoading(false);
+
+            if (initialLoad) {
+                initialLoad = false;
                 setTimeout(() => {
                     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
                 }, 100);
+            }
+        }, (err) => {
+            console.error(err);
+            setError('Не удалось загрузить сообщения');
+            setLoading(false);
+        });
+
+        return () => unsubscribe();
+    }, [userId, currentUser.uid]);
+
+    useEffect(() => {
+        const fetchRecipientData = async () => {
+            try {
+                const userData = await getUser(userId);
+                setRecipientData(userData);
             } catch (err) {
-                setError("Не удалось загрузить сообщения");
-                console.error(err);
-            } finally {
-                setLoading(false);
+                console.error("Не удалось загрузить данные пользователя", err);
             }
         };
 
-        fetchData();
-    }, [userId, currentUser]);
+        fetchRecipientData();
+    }, [userId]);
 
     const handleSendMessage = async (e) => {
         e.preventDefault();

@@ -15,12 +15,11 @@ import { format, isToday, isYesterday } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import FullscreenImage from "./FullscreenImage";
 
-function Chat({ user }) {
+function Chat({ user, userData }) {
     const { courseId } = useParams();
     const navigate = useNavigate();
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState('');
-    const [userData, setUserData] = useState(null);
     const [isSending, setIsSending] = useState(false);
     const [file, setFile] = useState(null);
     const [preview, setPreview] = useState(null);
@@ -82,8 +81,11 @@ function Chat({ user }) {
     useEffect(() => {
         const fetchUserData = async () => {
             const data = await getUser(user.uid);
-            setUserData(data);
+            const chats = await getUserChats(user.uid, userData?.role === "teacher");
+            setUserChats(chats);
             setLastReadTime(data?.lastReadChatTimes?.[courseId]?.toDate() || null);
+            const currentChat = chats.find(chat => chat.id === courseId);
+            setCurrentChatInfo(currentChat);
         };
         fetchUserData();
 
@@ -315,11 +317,11 @@ function Chat({ user }) {
                                     <div className="chat__participant-avatar">
                                         {p.avatar ? (
                                             <img src={p.avatar} alt={p.name} className="chat__participant-avatar-img" />
-                                        ) : (
+                                        ) : p.name ? (
                                             <div className="chat__participant-avatar-letter">
                                                 {p.name.charAt(0).toUpperCase()}
                                             </div>
-                                        )}
+                                        ) : null}
                                     </div>
                                     <div className="chat__participant-info">
                                         <div className="chat__participant-name">

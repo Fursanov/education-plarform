@@ -8,68 +8,227 @@ import {
     where,
     getDocs,
     addDoc,
-    deleteDoc
+    deleteDoc, updateDoc,
 } from 'firebase/firestore';
 import { db } from '../services/firebase';
 import './Assignments.css';
 import LoadingSpinner from '../components/UI/LoadingSpinner';
 
+import {
+    getStorage,
+    ref,
+    uploadBytes,
+    getDownloadURL
+} from 'firebase/storage';
+
 function Assignments({ user, userData }) {
     const { courseId } = useParams();
+    const storage = getStorage();
+
     const [course, setCourse] = useState(null);
     const [assignments, setAssignments] = useState([]);
+    const [isTeacher, setIsTeacher] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState(null);
+
     const [newAssignment, setNewAssignment] = useState({
         title: '',
         description: '',
         dueDate: '',
         file: null
     });
-    const [isTeacher, setIsTeacher] = useState(false);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState(null);
+
     const [filePreview, setFilePreview] = useState(null);
+
+    const [allSubmissions, setAllSubmissions] = useState({});
+
+    useEffect(() => {
+        if (!isTeacher) return;
+
+        const fetchAllSubmissions = async () => {
+            const q = query(
+                collection(db, 'assignmentSubmissions'),
+                where('courseId', '==', courseId)
+            );
+            const snap = await getDocs(q);
+            const map = {};
+            for (const docSnap of snap.docs) {
+                const data = docSnap.data();
+                // получаем имя студента
+                const studentSnap = await getDoc(doc(db, 'users', data.studentId));
+                const studentName = studentSnap.exists() ? studentSnap.data().name : data.studentId;
+
+                if (!map[data.assignmentId]) map[data.assignmentId] = [];
+                map[data.assignmentId].push({
+                    id: docSnap.id,           // <--- сохраняем id документа Firestore
+                    studentId: data.studentId,
+                    studentName,              // имя студента
+                    fileUrl: data.fileUrl,
+                    fileName: data.fileName,
+                    submittedAt: data.submittedAt.toDate(),
+                    teacherComment: data.teacherComment || '' // пустой комментарий по умолчанию
+                });
+
+                for (const assignmentId in map) {
+                    map[assignmentId].sort((a, b) => a.submittedAt - b.submittedAt);
+                }
+            }
+            setAllSubmissions(map);
+        };
+
+        fetchAllSubmissions();
+    }, [courseId, isTeacher]);
+    const [mySubmissions, setMySubmissions] = useState({});
+
+    /* ======================= helpers ======================= */
+
+    const handleSaveComment = async (submission) => {
+        try {
+            const docRef = doc(db, 'assignmentSubmissions', submission.id);
+            await updateDoc(docRef, { teacherComment: submission.teacherComment });
+
+            setAllSubmissions(prev => ({
+                ...prev,
+                [submission.assignmentId]: prev[submission.assignmentId]?.map(s =>
+                    s.id === submission.id ? { ...s, teacherComment: submission.teacherComment } : s
+                ) || []
+            }));
+
+            alert('Комментарий сохранён ✅');
+        } catch (e) {
+            console.error(e);
+            alert('Ошибка при сохранении комментария');
+        }
+    };
+
+    const uploadFile = async (file, path) => {
+        const fileRef = ref(
+            storage,
+            `${path}/${Date.now()}_${file.name}`
+        );
+        await uploadBytes(fileRef, file);
+        return await getDownloadURL(fileRef);
+    };
+
+    /* ======================= load data ======================= */
+
+    useEffect(() => {
+        if (!isTeacher) return;
+
+        const fetchAllSubmissions = async () => {
+            const q = query(
+                collection(db, 'assignmentSubmissions'),
+                where('courseId', '==', courseId)
+            );
+            const snap = await getDocs(q);
+            const submissionsMap = {};
+
+            // Получаем все уникальные studentId
+            const studentIds = [...new Set(snap.docs.map(d => d.data().studentId))];
+
+            // Подгружаем данные студентов за один раз
+            const studentsData = {};
+            await Promise.all(
+                studentIds.map(async (id) => {
+                    const studentSnap = await getDoc(doc(db, 'users', id));
+                    studentsData[id] = studentSnap.exists() ? studentSnap.data().name : id;
+                })
+            );
+
+            snap.forEach(docSnap => {
+                const data = docSnap.data();
+                if (!submissionsMap[data.assignmentId]) submissionsMap[data.assignmentId] = [];
+                submissionsMap[data.assignmentId].push({
+                    id: docSnap.id,
+                    studentId: data.studentId,
+                    studentName: studentsData[data.studentId],
+                    fileUrl: data.fileUrl,
+                    fileName: data.fileName,
+                    submittedAt: data.submittedAt.toDate(),
+                    teacherComment: data.teacherComment || ''
+                });
+            });
+
+            for (const assignmentId in submissionsMap) {
+                submissionsMap[assignmentId].sort((a, b) => a.submittedAt - b.submittedAt);
+            }
+
+            setAllSubmissions(submissionsMap);
+        };
+
+        fetchAllSubmissions();
+    }, [courseId, isTeacher]);
 
     useEffect(() => {
         const fetchData = async () => {
             try {
                 setIsLoading(true);
-                // Получаем данные курса
-                const courseDoc = await getDoc(doc(db, "courses", courseId));
-                if (!courseDoc.exists()) {
-                    throw new Error('Курс не найден');
-                }
 
-                setCourse(courseDoc.data());
-                setIsTeacher(courseDoc.data().teacherId === user.uid || userData.role === 'admin');
+                const courseSnap = await getDoc(doc(db, 'courses', courseId));
+                if (!courseSnap.exists()) throw new Error('Курс не найден');
 
-                // Получаем задания курса
-                const assignmentsQuery = query(
-                    collection(db, "assignments"),
-                    where("courseId", "==", courseId)
+                const courseData = courseSnap.data();
+                setCourse(courseData);
+                setIsTeacher(
+                    courseData.teacherId === user.uid || userData.role === 'admin'
                 );
-                const querySnapshot = await getDocs(assignmentsQuery);
-                const assignmentsList = [];
-                querySnapshot.forEach((doc) => {
-                    const data = doc.data();
-                    assignmentsList.push({
-                        id: doc.id,
-                        ...data,
-                        dueDate: data.dueDate.toDate(),
-                        ...(data.fileData && { fileUrl: data.fileData }) // Для совместимости
-                    });
-                });
-                setAssignments(assignmentsList);
-                setIsLoading(false);
-            } catch (err) {
-                setError(err.message);
+
+                const q = query(
+                    collection(db, 'assignments'),
+                    where('courseId', '==', courseId)
+                );
+
+                const snap = await getDocs(q);
+                const list = snap.docs.map(d => ({
+                    id: d.id,
+                    ...d.data(),
+                    dueDate: d.data().dueDate.toDate()
+                })).sort((a, b) => a.dueDate - b.dueDate);
+
+                setAssignments(list);
+            } catch (e) {
+                setError(e.message);
+            } finally {
                 setIsLoading(false);
             }
         };
+
         fetchData();
-    }, [courseId, user]);
+    }, [courseId, user.uid, userData.role]);
+
+    /* ======================= student submissions ======================= */
 
     useEffect(() => {
-        // Создаем превью для файла
+        if (isTeacher) return;
+
+        const fetchSubmissions = async () => {
+            const q = query(
+                collection(db, 'assignmentSubmissions'),
+                where('courseId', '==', courseId),
+                where('studentId', '==', user.uid)
+            );
+
+            const snap = await getDocs(q);
+            const map = {};
+            snap.forEach(d => {
+                const assignmentId = d.data().assignmentId;
+                if (!map[assignmentId]) map[assignmentId] = [];
+                map[assignmentId].push({
+                    id: d.id,
+                    ...d.data(),
+                    submittedAt: d.data().submittedAt.toDate()
+                });
+                map[assignmentId].sort((a, b) => a.submittedAt - b.submittedAt);
+            });
+            setMySubmissions(map);
+        };
+
+        fetchSubmissions();
+    }, [courseId, user.uid, isTeacher]);
+
+    /* ======================= previews ======================= */
+
+    useEffect(() => {
         if (!newAssignment.file) {
             setFilePreview(null);
             return;
@@ -84,53 +243,45 @@ function Assignments({ user, userData }) {
         }
     }, [newAssignment.file]);
 
-    const handleFileChange = (e) => {
-        const selectedFile = e.target.files[0];
-        if (selectedFile && selectedFile.size > 5 * 1024 * 1024) {
-            alert('Файл слишком большой. Максимальный размер: 5MB');
-            return;
-        }
-        setNewAssignment({
-            ...newAssignment,
-            file: selectedFile
-        });
-    };
-
-    const readFileAsBase64 = (file) => {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = () => resolve(reader.result);
-            reader.onerror = reject;
-            reader.readAsDataURL(file);
-        });
-    };
+    /* ======================= create assignment ======================= */
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError(null);
 
         try {
-            let fileData = null;
+            let fileUrl = null;
+            let fileName = null;
+
             if (newAssignment.file) {
-                fileData = await readFileAsBase64(newAssignment.file);
+                fileUrl = await uploadFile(
+                    newAssignment.file,
+                    `assignments/${courseId}/${Date.now()}_${newAssignment.file.name}`
+                );
+                fileName = newAssignment.file.name;
             }
 
-            const docRef = await addDoc(collection(db, "assignments"), {
+            const docRef = await addDoc(collection(db, 'assignments'), {
                 courseId,
                 title: newAssignment.title,
                 description: newAssignment.description,
                 dueDate: new Date(newAssignment.dueDate),
-                ...(fileData && { fileData, fileName: newAssignment.file.name }),
-                createdAt: new Date(),
-                createdBy: user.uid
+                fileUrl,
+                fileName,
+                createdBy: user.uid,
+                createdAt: new Date()
             });
 
-            setAssignments([...assignments, {
-                id: docRef.id,
-                ...newAssignment,
-                fileUrl: fileData, // Для совместимости с существующим кодом
-                dueDate: new Date(newAssignment.dueDate)
-            }]);
+            setAssignments(prev => [
+                ...prev,
+                {
+                    id: docRef.id,
+                    ...newAssignment,
+                    fileUrl,
+                    fileName,
+                    dueDate: new Date(newAssignment.dueDate)
+                }
+            ]);
 
             setNewAssignment({
                 title: '',
@@ -139,157 +290,274 @@ function Assignments({ user, userData }) {
                 file: null
             });
             setFilePreview(null);
-        } catch (err) {
-            setError('Ошибка при создании задания: ' + err.message);
-            console.error("Error creating assignment:", err);
+        } catch (e) {
+            setError('Ошибка при создании задания');
         }
     };
 
-    const handleDeleteAssignment = async (assignmentId) => {
-        if (window.confirm('Вы уверены, что хотите удалить это задание?')) {
-            try {
-                await deleteDoc(doc(db, "assignments", assignmentId));
-                setAssignments(assignments.filter(a => a.id !== assignmentId));
-            } catch (err) {
-                setError('Ошибка при удалении задания: ' + err.message);
-            }
+    /* ======================= upload solution ======================= */
+
+    const handleUploadSubmission = async (e, assignmentId) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        try {
+            const fileUrl = await uploadFile(
+                file,
+                `submissions/${courseId}/${assignmentId}/${user.uid}`
+            );
+
+            const docRef = await addDoc(collection(db, 'assignmentSubmissions'), {
+                assignmentId,
+                courseId,
+                studentId: user.uid,
+                fileUrl,
+                fileName: file.name,
+                submittedAt: new Date(),
+                teacherComment: ''
+            });
+
+            setMySubmissions(prev => {
+                const prevArr = prev[assignmentId] || [];
+                return {
+                    ...prev,
+                    [assignmentId]: [
+                        ...prevArr,
+                        {
+                            id: docRef.id,
+                            fileUrl,
+                            fileName: file.name,
+                            submittedAt: new Date(),
+                            teacherComment: ''
+                        }
+                    ]
+                };
+            });
+
+            alert('Задание отправлено ✅');
+        } catch (e) {
+            console.error(e);
+            alert('Ошибка при загрузке решения');
         }
     };
 
-    const getFileIcon = (fileName) => {
-        const ext = fileName?.split('.').pop().toLowerCase() || '';
+    /* ======================= delete ======================= */
 
-        if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext)) return '🖼️';
-        if (['pdf'].includes(ext)) return '📄';
-        if (['doc', 'docx'].includes(ext)) return '📝';
-        if (['xls', 'xlsx'].includes(ext)) return '📊';
-        if (['zip', 'rar', '7z'].includes(ext)) return '🗜️';
-        return '📁';
+    const handleDeleteAssignment = async (id) => {
+        if (!window.confirm('Удалить задание?')) return;
+        await deleteDoc(doc(db, 'assignments', id));
+        setAssignments(prev => prev.filter(a => a.id !== id));
     };
+
+    const getFileExtension = (fileUrl) => {
+        if (!fileUrl) return '';
+        const cleanUrl = fileUrl.split('?')[0]; // убираем query параметры
+        return cleanUrl.split('.').pop().toLowerCase();
+    };
+
+    const getFilePreview = (fileUrl) => {
+        const ext = getFileExtension(fileUrl);
+        const imageExts = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+
+        if (imageExts.includes(ext)) return { type: 'image', src: fileUrl };
+        if (ext === 'pdf') return { type: 'icon', icon: '📄' };
+        if (['doc','docx'].includes(ext)) return { type: 'icon', icon: '📝' };
+        if (['xls','xlsx'].includes(ext)) return { type: 'icon', icon: '📊' };
+        if (['zip','rar','7z'].includes(ext)) return { type: 'icon', icon: '🗜️' };
+        return { type: 'icon', icon: '📁' };
+    };
+
+    /* ======================= ui ======================= */
 
     if (isLoading) return <LoadingSpinner />;
     if (error) return <div className="error-message">{error}</div>;
-    if (!course) return <div className="error-message">Курс не найден</div>;
+    if (!course) return null;
 
     return (
         <div className="assignments-page">
-            <h1>Задания курса: {course.title}</h1>
+            <h1>Задания курса: {course.courseTitle}</h1>
 
             {isTeacher && (
-                <div className="create-assignment">
-                    <h2>Добавить новое задание</h2>
-                    {error && <p className="error">{error}</p>}
-                    <form onSubmit={handleSubmit}>
-                        <input
-                            type="text"
-                            placeholder="Название задания"
-                            value={newAssignment.title}
-                            onChange={(e) => setNewAssignment({...newAssignment, title: e.target.value})}
-                            required
-                        />
-                        <textarea
-                            placeholder="Описание задания"
-                            value={newAssignment.description}
-                            onChange={(e) => setNewAssignment({...newAssignment, description: e.target.value})}
-                            required
-                        />
-                        <div className="form-group">
-                            <label>Срок сдачи:</label>
-                            <input
-                                type="datetime-local"
-                                value={newAssignment.dueDate}
-                                onChange={(e) => setNewAssignment({...newAssignment, dueDate: e.target.value})}
-                                required
-                            />
-                        </div>
-                        <div className="form-group">
-                            <label>Файл задания (опционально, до 5MB):</label>
-                            <input
-                                type="file"
-                                onChange={handleFileChange}
-                                accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.zip,.rar,.7z"
-                            />
-                            {filePreview && (
-                                <div className="file-preview">
-                                    {filePreview !== 'file' ? (
-                                        <img src={filePreview} alt="Превью файла" className="preview-image" />
-                                    ) : (
-                                        <div className="preview-file">
-                                            {getFileIcon(newAssignment.file.name)} {newAssignment.file.name}
-                                        </div>
-                                    )}
-                                    <button
-                                        type="button"
-                                        onClick={() => {
-                                            setNewAssignment({...newAssignment, file: null});
-                                            setFilePreview(null);
-                                        }}
-                                        className="remove-file-btn"
-                                    >
-                                        ×
-                                    </button>
-                                </div>
-                            )}
-                        </div>
-                        <button type="submit">Создать задание</button>
-                    </form>
-                </div>
+                <form onSubmit={handleSubmit} className="create-assignment">
+                    <input
+                        placeholder="Название"
+                        value={newAssignment.title}
+                        onChange={e =>
+                            setNewAssignment({ ...newAssignment, title: e.target.value })
+                        }
+                        required
+                    />
+                    <textarea
+                        placeholder="Описание"
+                        value={newAssignment.description}
+                        onChange={e =>
+                            setNewAssignment({ ...newAssignment, description: e.target.value })
+                        }
+                        required
+                    />
+                    <input
+                        type="datetime-local"
+                        value={newAssignment.dueDate}
+                        onChange={e =>
+                            setNewAssignment({ ...newAssignment, dueDate: e.target.value })
+                        }
+                        required
+                    />
+                    <input
+                        type="file"
+                        onChange={e =>
+                            setNewAssignment({ ...newAssignment, file: e.target.files[0] })
+                        }
+                    />
+                    <button>Создать</button>
+                </form>
             )}
 
-            <div className="assignments-list">
-                {assignments.length > 0 ? (
-                    assignments
-                        .sort((a, b) => a.dueDate - b.dueDate)
-                        .map(assignment => (
-                            <div key={assignment.id} className="assignment-card">
-                                <h3>{assignment.title}</h3>
-                                <p className="assignment-description">{assignment.description}</p>
-                                <p className="due-date">
-                                    <strong>Срок сдачи:</strong> {assignment.dueDate.toLocaleString()}
-                                </p>
-                                {assignment.fileUrl && (
-                                    <div className="file-attachment">
-                                        {assignment.fileUrl.startsWith('data:image/') ? (
-                                            <img
-                                                src={assignment.fileUrl}
-                                                alt="Прикрепленное изображение"
-                                                className="attachment-image"
-                                                onClick={() => window.open(assignment.fileUrl, '_blank')}
-                                            />
-                                        ) : (
-                                            <div className="file-download-card">
-                                                <div className="file-icon">
-                                                    {getFileIcon(assignment?.fileName)}
+            {assignments.map(a => (
+                <div key={a.id} className="assignment-card">
+                    <h3>{a.title}</h3>
+                    <p>{a.description}</p>
+                    <p>Срок: {a.dueDate.toLocaleString()}</p>
+
+                    {a.fileUrl && (() => {
+                        const preview = getFilePreview(a.fileUrl);
+                        if (preview.type === 'image') {
+                            return <img src={preview.src} alt={a.fileName} className="assignment-image" />;
+                        } else {
+                            return (
+                                <a
+                                    href={a.fileUrl}
+                                    className="download-btn"
+                                    target="_blank"
+                                    rel="noreferrer"
+                                >
+                                    Скачать файл задания {preview.icon} {a.fileName}
+                                </a>
+                            );
+                        }
+                    })()}
+
+                    {!isTeacher && (
+                        <div className="student-submission-block">
+                            {mySubmissions[a.id]?.length > 0 ? (
+                                <>
+                                    {mySubmissions[a.id].map((sub) => (
+                                        <div key={sub.id} className="submission-item-student">
+                                            {sub.fileUrl && (() => {
+                                                const preview = getFilePreview(sub.fileUrl);
+                                                if (preview.type === 'image') {
+                                                    return <img src={preview.src} alt={sub.fileName} className="assignment-image" />;
+                                                } else {
+                                                    return (
+                                                        <a
+                                                            href={sub.fileUrl}
+                                                            className="download-btn"
+                                                            target="_blank"
+                                                            rel="noreferrer"
+                                                        >
+                                                            Скачать решение {preview.icon} {sub.fileName}
+                                                        </a>
+                                                    );
+                                                }
+                                            })()}
+                                            {sub.teacherComment ? (
+                                                <div className="teacher-comment-student">
+                                                    <strong>Комментарий преподавателя:</strong>
+                                                    <p>{sub.teacherComment}</p>
                                                 </div>
-                                                <div className="file-info">
-                                                    <div className="file-name">{assignment?.fileName}</div>
-                                                    <a style={{marginLeft: 10+'px'}}
-                                                        href={assignment.fileUrl}
-                                                        download={assignment?.fileName}
+                                            ) : (
+                                                <div className="teacher-comment-student">
+                                                    <strong>Комментариев нет</strong>
+                                                </div>
+                                            )}
+                                        </div>
+                                    ))}
+                                    <label className="btn download-btn">
+                                        Загрузить новую попытку
+                                        <input
+                                            hidden
+                                            type="file"
+                                            onChange={e => handleUploadSubmission(e, a.id)}
+                                        />
+                                    </label>
+                                </>
+                            ) : (
+                                <label className="btn download-btn">
+                                    Загрузить решение
+                                    <input
+                                        hidden
+                                        type="file"
+                                        onChange={e => handleUploadSubmission(e, a.id)}
+                                    />
+                                </label>
+                            )}
+                        </div>
+                    )}
+
+                    {isTeacher && allSubmissions[a.id] && (
+                        <div className="submissions-list">
+                            <h4>Решения студентов:</h4>
+                            {allSubmissions[a.id].map(sub => (
+                                <div key={sub.id} className="submission-item">
+                                    <div className="submission-header">
+                                        <span className="student-name">{sub.studentName}</span>
+                                        <span className="submitted-at">{sub.submittedAt.toLocaleString()}</span>
+                                        {sub.fileUrl && (() => {
+                                            const preview = getFilePreview(sub.fileUrl);
+                                            if (preview.type === 'image') {
+                                                return <img src={preview.src} alt={sub.fileName} className="assignment-image" />;
+                                            } else {
+                                                return (
+                                                    <a
+                                                        href={sub.fileUrl}
                                                         className="download-btn"
+                                                        target="_blank"
+                                                        rel="noreferrer"
                                                     >
-                                                        Скачать
+                                                        Скачать решение {preview.icon} {sub.fileName}
                                                     </a>
-                                                </div>
-                                            </div>
-                                        )}
+                                                );
+                                            }
+                                        })()}
                                     </div>
-                                )}
-                                {isTeacher && (
-                                    <div className="assignment-actions">
-                                        <button className="btn delete-btn" onClick={() => handleDeleteAssignment(assignment.id)}>
-                                            Удалить
+
+                                    <div className="teacher-comment">
+                                      <textarea
+                                          placeholder="Комментарий преподавателя"
+                                          value={sub.teacherComment || ''}
+                                          onChange={(e) => {
+                                              setAllSubmissions(prev => ({
+                                                  ...prev,
+                                                  [a.id]: prev[a.id].map(s =>
+                                                      s.id === sub.id
+                                                          ? { ...s, teacherComment: e.target.value }
+                                                          : s
+                                                  )
+                                              }));
+                                          }}
+                                      />
+                                        <button
+                                            className="btn save-comment-btn"
+                                            onClick={() => handleSaveComment(sub)}
+                                        >
+                                            Сохранить
                                         </button>
                                     </div>
-                                )}
-                            </div>
-                        ))
-                ) : (
-                    <div className="empty-state">
-                        <p>Пока нет заданий для этого курса</p>
-                    </div>
-                )}
-            </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+
+                    {isTeacher && (
+                        <button
+                            className="btn delete-btn"
+                            onClick={() => handleDeleteAssignment(a.id)}
+                        >
+                            Удалить
+                        </button>
+                    )}
+                </div>
+            ))}
         </div>
     );
 }

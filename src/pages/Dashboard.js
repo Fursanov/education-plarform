@@ -158,7 +158,7 @@ function Dashboard({ user }) {
                             <Link to="/create-course" className="dashboard__btn dashboard__btn-primary">
                                 Создать курс
                             </Link>
-                            <ImportDataButton user={user} />
+                            {/*<ImportDataButton user={user} />*/}
                         </div>
 
                         {loadingTeacherCourses ? (

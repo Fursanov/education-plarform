@@ -31,7 +31,7 @@ body {
 
 .main-content {
   flex: 1;
-  padding: 2rem;
+  padding: 0;
   max-width: 1400px;
   margin: 0 auto;
   width: 100%;
@@ -96,7 +96,6 @@ ul {
 
 .main-content {
   flex: 1;
-  padding: 2rem;
   transition: margin-left 0.3s ease;
 }
 

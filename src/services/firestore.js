@@ -195,8 +195,9 @@ export const getChatParticipants = async (courseId) => {
         const courseRef = doc(db, 'courses', courseId);
         const courseSnap = await getDoc(courseRef);
 
-        if (courseId === 'general')
+        if (courseId === 'general') {
             return getAllUsers();
+        }
 
         if (!courseSnap.exists()) {
             console.error('Course not found');

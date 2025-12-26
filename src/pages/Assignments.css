@@ -344,11 +344,13 @@
 }
 
 .download-btn {
+    margin-top: 5px;
     padding: 0.3rem 0.8rem;
     background: linear-gradient(135deg, #065f46 0%, #059669 100%);
     color: white;
     border-radius: 4px;
     font-size: 0.9rem;
+    text-align: center;
     text-decoration: none;
     display: inline-block;
     transition: all 0.2s ease;
@@ -371,6 +373,7 @@
 .delete-btn {
     padding: 0.5rem 1rem;
     background: #FEE2E2;
+    margin-top: 10px;
     color: #DC2626;
     border: none;
     border-radius: 6px;
@@ -455,3 +458,87 @@
         padding: 1.25rem;
     }
 }
+
+.submissions-list {
+    margin-top: 15px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #fafafa;
+}
+
+.submission-item {
+    margin-bottom: 10px;
+    padding: 8px;
+    border-bottom: 1px solid #eee;
+}
+
+.submission-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 5px;
+}
+
+.student-name {
+    font-weight: 500;
+}
+
+.submitted-at {
+    font-size: 0.9em;
+    color: #555;
+}
+
+.teacher-comment {
+    display: flex;
+    gap: 8px;
+    margin-top: 5px;
+}
+
+.teacher-comment textarea {
+    flex: 1;
+    padding: 5px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    resize: vertical;
+}
+
+.save-comment-btn {
+    padding: 6px 12px;
+    background-color: #4caf50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.save-comment-btn:hover {
+    background-color: #45a049;
+}
+
+/* Стиль комментария для студента */
+.teacher-comment-student {
+    margin-top: 10px;
+    padding: 8px;
+    background-color: #eaf4ff;
+    border-left: 4px solid #2196f3;
+    border-radius: 5px;
+}
+
+.teacher-comment-student p {
+    margin: 0;
+    font-size: 0.95em;
+}
+
+.submission-item-student {
+    background: #b1cdd9;
+    border-radius: 10px;
+    margin-top: 10px;
+}
+
+.assignment-image {
+     max-width: 200px;
+     max-height: 200px;
+     display: block;
+     margin-top: 10px;
+ }

@@ -221,7 +221,7 @@ function AdminCourses({ user }) {
             </div>
 
             <div className="admin-courses-controls">
-                <AdminImportDataButton user={user} />
+                {/*<AdminImportDataButton user={user} />*/}
                 <div className="search-filter-container">
                     <input
                         type="text"

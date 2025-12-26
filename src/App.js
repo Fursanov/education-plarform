@@ -61,10 +61,11 @@ function App() {
 
   return (
       <Router>
+        <Navbar user={userData} toggleSidebar={toggleSidebar} />
         <div className="app-container">
           {user && (
               <>
-                <Navbar user={userData} toggleSidebar={toggleSidebar} />
+
                 <Sidebar user={userData} isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
               </>
           )}
@@ -77,7 +78,7 @@ function App() {
               <Route path="/profile/:userId" element={<UserProfile currentUser={user} />} />
               <Route path="/" element={user ? <Dashboard user={user} /> : <Navigate to="/login" />} />
               <Route path="/create-course" element={<CreateCourse user={user} />} />
-              <Route path="/video-call/:courseId" element={<VideoCall user={user} />} />
+              <Route path="/video-call/:courseId" element={<VideoCall user={user} userData={userData}/>} />
               <Route path="/assignments/:courseId" element={user ? <Assignments user={user} userData={userData} /> : <Navigate to="/login" />} />
               <Route path="/chat/:courseId" element={user ? <Chat userData={userData} user={user} /> : <Navigate to="/login" />} />
               <Route path="/admin" element={userData?.role === 'admin' ? <AdminPage user={user} /> : <Navigate to="/" />} />

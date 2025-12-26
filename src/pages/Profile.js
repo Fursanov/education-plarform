@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { updateAuthProfile } from '../services/auth';
 import { updateUser, getUser, getFriends, getUsersByIds, searchUsersByNameOrTag } from '../services/firestore';
 import './Profile.css';
 
@@ -103,10 +102,6 @@ function Profile({ user }) {
 
     const handleFriendClick = (friendId) => {
         navigate(`/profile/${friendId}`);
-    };
-
-    const handleAddFriend = async (userId) => {
-        console.log(`Добавление пользователя ${userId} в друзья`);
     };
 
     const generateUniqueTag = () => {
